@@ -531,37 +531,37 @@ const CostComparisonChart = ({ phase, clientCost, proposedCost }) => {
 
 // Simplified rendering logic to remove .replace()
 const renderAgileRoadmap = (combinedRoadmap) => (
-  <div className="bg-white rounded-xl shadow-xl p-8">
-    <h2 className="text-3xl font-bold mb-6 text-indigo-900 flex items-center gap-2">
+  <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
+    <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900 flex items-center gap-2">
       <GitBranch size={30} />
       Agile Feature Roadmap (8-Week MVP)
     </h2>
-    <p className="text-lg mb-8 text-gray-700">
+    <p className="text-base md:text-lg mb-8 text-gray-700">
       This integrated roadmap shows parallel feature development for the core customer application and the internal administration portal across four 2-week sprints.
     </p>
 
     <div className="space-y-12">
       {combinedRoadmap.map((sprintGroup, index) => (
-        <div key={index} className="border-4 border-indigo-500 rounded-xl p-6 bg-indigo-50 relative">
-          <div className="absolute -top-4 left-4 bg-indigo-700 text-white text-sm px-4 py-1 rounded-full font-bold shadow-lg">
+        <div key={index} className="border-4 border-indigo-500 rounded-xl p-4 md:p-6 bg-indigo-50 relative">
+          <div className="absolute -top-4 left-4 bg-indigo-700 text-white text-xs md:text-sm px-3 md:px-4 py-1 rounded-full font-bold shadow-lg">
             {`SPRINT ${sprintGroup.customer.sprint}: 2 WEEKS`}
           </div>
 
-          <h3 className="text-2xl font-bold text-indigo-900 pt-4 mb-6">
+          <h3 className="text-xl md:text-2xl font-bold text-indigo-900 pt-4 mb-4 md:mb-6">
             Sprint {sprintGroup.customer.sprint} Focus: {sprintGroup.customer.theme} & {sprintGroup.admin.theme}
           </h3>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* Customer Deliverables Column */}
-            <div className="bg-white rounded-lg p-5 shadow-lg border-t-4 border-green-500">
+            <div className="bg-white rounded-lg p-4 shadow-lg border-t-4 border-green-500">
               <div className="flex items-center gap-3 mb-4">
                 <ShoppingCart size={24} className="text-green-600" />
-                <h4 className="text-xl font-bold text-green-700">Customer Focus: {sprintGroup.customer.title}</h4>
+                <h4 className="text-lg md:text-xl font-bold text-green-700">Customer Focus: {sprintGroup.customer.title}</h4>
               </div>
               <ul className="space-y-3">
                 {sprintGroup.customer.deliverables.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-gray-700 text-base">
+                  <li key={i} className="flex items-start gap-2 text-gray-700 text-sm md:text-base">
                     <div className="text-xl flex-shrink-0 mt-1">{item.icon}</div>
                     <span dangerouslySetInnerHTML={{ __html: item.desc }}></span>
                   </li>
@@ -570,14 +570,14 @@ const renderAgileRoadmap = (combinedRoadmap) => (
             </div>
 
             {/* Admin Deliverables Column */}
-            <div className="bg-white rounded-lg p-5 shadow-lg border-t-4 border-red-500">
+            <div className="bg-white rounded-lg p-4 shadow-lg border-t-4 border-red-500">
               <div className="flex items-center gap-3 mb-4">
                 <TrendingUp size={24} className="text-red-600" />
-                <h4 className="text-xl font-bold text-red-700">Admin/Ops Focus: {sprintGroup.admin.title}</h4>
+                <h4 className="text-lg md:text-xl font-bold text-red-700">Admin/Ops Focus: {sprintGroup.admin.title}</h4>
               </div>
               <ul className="space-y-3">
                 {sprintGroup.admin.deliverables.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-gray-700 text-base">
+                  <li key={i} className="flex items-start gap-2 text-gray-700 text-sm md:text-base">
                     <div className="text-xl flex-shrink-0 mt-1">{item.icon}</div>
                     <span dangerouslySetInnerHTML={{ __html: item.desc }}></span>
                   </li>
@@ -594,38 +594,38 @@ const renderAgileRoadmap = (combinedRoadmap) => (
 // Simplified rendering logic to remove .replace()
 const renderSingleRoadmap = (roadmap, title, icon, color) => (
   // Used for Technical, UI/UX, AI/ML roadmaps
-  <div className="bg-white rounded-xl shadow-xl p-8">
-    <h2 className="text-3xl font-bold mb-6 text-indigo-900 flex items-center gap-2">
+  <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
+    <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900 flex items-center gap-2">
       {icon}
       {title}
     </h2>
-    <p className="text-lg mb-8 text-gray-700">
+    <p className="text-base md:text-lg mb-8 text-gray-700">
       This is an <strong>8-week MVP roadmap</strong> (four 2-week sprints) focusing on delivering core value quickly with clear, tangible results at each stage.
     </p>
 
     <div className="space-y-10">
       {roadmap.map((sprint, index) => (
-        <div key={index} className={`border-4 border-${color}-200 rounded-xl p-6 bg-${color}-50 relative`}>
+        <div key={index} className={`border-4 border-${color}-200 rounded-xl p-4 md:p-6 bg-${color}-50 relative`}>
           {/* Using fixed indigo-700 for high contrast on the sprint label */}
-          <div className="absolute -top-4 left-4 bg-indigo-700 text-white text-sm px-4 py-1 rounded-full font-bold shadow-lg">
+          <div className="absolute -top-4 left-4 bg-indigo-700 text-white text-xs md:text-sm px-3 md:px-4 py-1 rounded-full font-bold shadow-lg">
             {`SPRINT ${sprint.sprint}: ${sprint.duration}`}
           </div>
 
           <div className="flex items-center gap-4 pt-4 mb-4">
-            <div className="text-5xl flex-shrink-0">{sprint.icon}</div>
+            <div className="text-4xl md:text-5xl flex-shrink-0">{sprint.icon}</div>
             <div>
-              <h3 className={`text-2xl font-bold text-${color}-800`}>{sprint.title}</h3>
-              <p className="text-indigo-600 font-semibold">{sprint.theme}</p>
+              <h3 className={`text-xl md:text-2xl font-bold text-${color}-800`}>{sprint.title}</h3>
+              <p className="text-indigo-600 font-semibold text-sm md:text-base">{sprint.theme}</p>
             </div>
           </div>
 
-          <h4 className="font-bold text-xl mb-3 text-gray-700">Key Deliverables:</h4>
+          <h4 className="font-bold text-lg md:text-xl mb-3 text-gray-700">Key Deliverables:</h4>
           <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
             {sprint.deliverables.map((item, i) => (
               <div key={i} className="flex items-start gap-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
                 <div className="text-xl flex-shrink-0 mt-1">{item.icon}</div>
                 <span
-                  className="text-gray-700 text-base"
+                  className="text-gray-700 text-sm md:text-base"
                   dangerouslySetInnerHTML={{ __html: item.desc }}
                 ></span>
               </div>
@@ -640,22 +640,25 @@ const renderSingleRoadmap = (roadmap, title, icon, color) => (
 // --- MAIN COMPONENT ---
 
 const ArchitectureComparison = () => {
-  const [activeTab, setActiveTab] = useState('agile_feature_roadmap'); // Default to new tab
+  // FIX: Set initial page to 'overview' (Quick Summary) as requested
+  const [activeTab, setActiveTab] = useState('overview');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
+    // Universal view compatibility is ensured by using fluid widths and responsive padding
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-center mb-6 md:mb-8 text-indigo-900 leading-tight">
+        <h1 className="text-2xl md:text-4xl font-extrabold text-center mb-6 md:mb-8 text-indigo-900 leading-tight p-2">
           Wezu Smart Battery System - Strategic Architecture & Roadmap
         </h1>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation (Responsive scrolling for universal compatibility) */}
         <div className="flex gap-2 mb-8 overflow-x-auto bg-white rounded-xl p-2 shadow-xl border border-indigo-200">
           {tabOrder.map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold text-sm md:text-base transition whitespace-nowrap flex-shrink-0 ${activeTab === tab
+              // Adjusted text size and padding for better mobile/universal fit
+              className={`px-3 py-2 text-xs md:px-4 md:py-2 md:text-sm lg:text-base rounded-lg font-semibold transition whitespace-nowrap flex-shrink-0 ${activeTab === tab
                 ? 'bg-indigo-600 text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700'
                 }`}
@@ -667,14 +670,14 @@ const ArchitectureComparison = () => {
 
         {/* --- TABS --- */}
 
-        {/* Overview Tab */}
+        {/* Overview Tab (Quick Summary) */}
         {activeTab === 'overview' && (
           <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-            <h2 className="text-3xl font-bold mb-6 text-indigo-900">Quick Summary: Strategy & Savings</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900">Quick Summary: Strategy & Savings</h2>
 
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div className="border-4 border-red-300 rounded-xl p-6 bg-red-50">
-                <h3 className="text-2xl font-bold mb-4 text-red-700 flex items-center gap-2"><X size={24} /> Client Architecture (Azure)</h3>
+                <h3 className="text-xl md:text-2xl font-bold mb-4 text-red-700 flex items-center gap-2"><X size={24} /> Client Architecture (Azure)</h3>
                 <ul className="space-y-3 text-gray-700">
                   <li className="flex items-start gap-2">
                     <X className="text-red-500 mt-1 flex-shrink-0" size={20} />
@@ -695,7 +698,7 @@ const ArchitectureComparison = () => {
               </div>
 
               <div className="border-4 border-green-300 rounded-xl p-6 bg-green-50">
-                <h3 className="text-2xl font-bold mb-4 text-green-700 flex items-center gap-2"><Check size={24} /> Proposed Architecture (Multi-cloud)</h3>
+                <h3 className="text-xl md:text-2xl font-bold mb-4 text-green-700 flex items-center gap-2"><Check size={24} /> Proposed Architecture (Multi-cloud)</h3>
                 <ul className="space-y-3 text-gray-700">
                   <li className="flex items-start gap-2">
                     <Check className="text-green-500 mt-1 flex-shrink-0" size={20} />
@@ -717,22 +720,22 @@ const ArchitectureComparison = () => {
             </div>
 
             <div className="bg-gradient-to-r from-green-400 to-green-600 text-white rounded-xl p-8 text-center shadow-2xl">
-              <h3 className="text-3xl font-bold mb-4">💰 Projected 2-Year Cost Reduction</h3>
-              <p className="text-5xl font-bold mb-2">$157,680</p>
-              <p className="text-xl">This savings is achieved by optimizing data services and leveraging open-source components, allowing for more investment in feature development.</p>
+              <h3 className="text-2xl md:text-3xl font-bold mb-4">💰 Projected 2-Year Cost Reduction</h3>
+              <p className="text-4xl md:text-5xl font-bold mb-2">$157,680</p>
+              <p className="text-base md:text-xl">This savings is achieved by optimizing data services and leveraging open-source components, allowing for more investment in feature development.</p>
             </div>
           </div>
         )}
 
-        {/* --- DIAGRAM TAB (HTML/Tailwind CSS Only) --- */}
+        {/* --- DIAGRAM TAB --- */}
         {activeTab === 'diagram' && (
           <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-            <h2 className="text-3xl font-bold mb-6 text-indigo-900 flex items-center gap-2">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900 flex items-center gap-2">
               <Layers size={30} />
               Wezu Smart Battery System - High-Level Architecture
             </h2>
 
-            {/* START: NEW VISUAL CARDS FOR KEY PRINCIPLES */}
+            {/* Key Principles Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Clean Architecture Card */}
               <div className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-indigo-600 transition-all duration-300 hover:scale-[1.02]">
@@ -740,11 +743,11 @@ const ArchitectureComparison = () => {
                   <Layers size={24} className="text-indigo-600" />
                   <h3 className="text-xl font-bold text-gray-900">Clean Architecture Principles</h3>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                   The entire system is built on <strong>Clean Architecture</strong> principles for maximum separation of concerns, ensuring the application is highly testable, maintainable, and independent of specific frameworks or databases.
                 </p>
                 <div className="mt-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
                     High Maintainability
                   </span>
                 </div>
@@ -755,35 +758,34 @@ const ArchitectureComparison = () => {
                   <Cloud size={24} className="text-emerald-600" />
                   <h3 className="text-xl font-bold text-gray-900">Cloud Agnostic (K8s)</h3>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                   We guarantee portability by using <strong>Kubernetes (K8s)</strong> orchestration, avoiding vendor lock-in and allowing seamless deployment across AWS, Azure, or GCP.
                 </p>
                 <div className="mt-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
                     Vendor Lock-in Avoided
                   </span>
                 </div>
               </div>
             </div>
-            {/* END: NEW VISUAL CARDS FOR KEY PRINCIPLES */}
 
-            {/* --- FIX APPLIED HERE: Added overflow-x-auto to contain the wide diagram --- */}
-            <div className="overflow-x-auto">
-              <div className="flex flex-col items-center border-4 border-gray-200 rounded-xl p-4 bg-gray-50 min-w-max">
+            {/* The Diagram structure itself, optimized for responsiveness */}
+            <div className="overflow-x-auto w-full">
+              <div className="flex flex-col items-center border-4 border-gray-200 rounded-xl p-4 bg-gray-50 w-full min-w-[300px]">
 
                 {/* 1. TOP LAYER: Client Apps & Monitoring */}
-                <div className="flex justify-between w-full mb-6 gap-2 md:gap-4">
-                  <div className="flex flex-col items-center p-3 md:p-4 bg-red-100 rounded-lg shadow-md border-red-300 border-2 w-1/3">
+                <div className="flex flex-col md:flex-row justify-between w-full mb-6 gap-4">
+                  <div className="flex flex-col items-center p-3 md:p-4 bg-red-100 rounded-lg shadow-md border-red-300 border-2 w-full md:w-1/3">
                     <Code size={24} className="text-red-600 mb-1 md:mb-2" />
                     <span className="font-bold text-sm md:text-lg text-red-800 text-center">Client Applications</span>
                     <span className="text-xs text-gray-600 text-center hidden md:block">Customer, Admin, Dealer Portals</span>
                   </div>
-                  <div className="flex flex-col items-center p-3 md:p-4 bg-yellow-100 rounded-lg shadow-md border-yellow-300 border-2 w-1/3">
+                  <div className="flex flex-col items-center p-3 md:p-4 bg-yellow-100 rounded-lg shadow-md border-yellow-300 border-2 w-full md:w-1/3">
                     <Terminal size={24} className="text-yellow-600 mb-1 md:mb-2" />
                     <span className="font-bold text-sm md:text-lg text-yellow-800 text-center">Monitoring & Alerting</span>
                     <span className="text-xs text-gray-600 text-center hidden md:block">Prometheus, Grafana, ELK</span>
                   </div>
-                  <div className="flex flex-col items-center p-3 md:p-4 bg-green-100 rounded-lg shadow-md border-green-300 border-2 w-1/3">
+                  <div className="flex flex-col items-center p-3 md:p-4 bg-green-100 rounded-lg shadow-md border-green-300 border-2 w-full md:w-1/3">
                     <Brain size={24} className="text-green-600 mb-1 md:mb-2" />
                     <span className="font-bold text-sm md:text-lg text-green-800 text-center">AI/ML Services</span>
                     <span className="text-xs text-gray-600 text-center hidden md:block">Predictive Maintenance, Fraud</span>
@@ -805,10 +807,11 @@ const ArchitectureComparison = () => {
                     CLOUD PLATFORM (K8s Cluster)
                   </span>
 
-                  <div className="flex justify-around items-start gap-2 md:gap-4">
+                  {/* Stacks vertically on mobile, horizontally on medium screens and up */}
+                  <div className="flex flex-col md:flex-row justify-around items-start gap-4">
 
                     {/* Ingestion Column */}
-                    <div className="flex flex-col items-center w-1/4">
+                    <div className="flex flex-col items-center w-full md:w-1/4 pb-4 border-b-2 border-blue-200 md:border-b-0 md:border-r-2 md:pr-4">
                       <MessageSquare size={28} className="text-indigo-600 mb-1 md:mb-2" />
                       <span className="font-bold text-xs md:text-sm text-indigo-800 text-center">Messaging & Ingestion</span>
                       <span className="text-xs text-gray-700 text-center">HiveMQ, <strong>Kafka</strong></span>
@@ -819,7 +822,7 @@ const ArchitectureComparison = () => {
                     </div>
 
                     {/* Microservices Column */}
-                    <div className="flex flex-col items-center w-2/4 border-l-2 border-r-2 border-blue-200 px-2 md:px-4">
+                    <div className="flex flex-col items-center w-full md:w-2/4 border-y-2 border-blue-200 md:border-y-0 md:border-l-2 md:border-r-2 px-0 md:px-4 py-4 md:py-0">
                       <Server size={28} className="text-purple-600 mb-1 md:mb-2" />
                       <span className="font-bold text-sm md:text-base text-purple-800">Backend Microservices</span>
                       <span className="text-xs text-gray-700 text-center mb-2">Device Mgmt, Rental, Payments, Inventory</span>
@@ -838,7 +841,7 @@ const ArchitectureComparison = () => {
                     </div>
 
                     {/* Data Lake Column */}
-                    <div className="flex flex-col items-center w-1/4">
+                    <div className="flex flex-col items-center w-full md:w-1/4 pt-4 md:pt-0 md:pl-4 md:border-l-2 md:border-blue-200">
                       <HardDrive size={28} className="text-red-600 mb-1 md:mb-2" />
                       <span className="font-bold text-xs md:text-sm text-red-800">Long-term Storage</span>
                       <span className="text-xs text-gray-700 text-center">S3 / R2 (Data Lake)</span>
@@ -850,9 +853,9 @@ const ArchitectureComparison = () => {
                   </div>
                 </div>
 
-                {/* 3. BOTTOM LAYER: Data Persistence */}
+                {/* 3. BOTTOM LAYER: Data Persistence (Uses responsive grid) */}
                 <div className="flex justify-center w-full mb-6">
-                  <div className="grid grid-cols-2 md:flex md:justify-around p-4 bg-orange-50 rounded-xl shadow-md border-orange-300 border-2 w-full max-w-4xl gap-4 md:gap-8">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 p-4 bg-orange-50 rounded-xl shadow-md border-orange-300 border-2 w-full max-w-4xl gap-4 md:gap-8">
 
                     <div className="flex flex-col items-center">
                       <Database size={24} className="text-orange-600 mb-1" />
@@ -887,24 +890,23 @@ const ArchitectureComparison = () => {
 
                 {/* 4. GROUND LAYER: IoT Devices */}
                 <div className="flex justify-center w-full">
-                  <div className="flex items-center p-4 bg-purple-100 rounded-lg shadow-md border-purple-300 border-2 w-2/3 md:w-1/3">
+                  <div className="flex items-center p-4 bg-purple-100 rounded-lg shadow-md border-purple-300 border-2 w-full md:w-1/3">
                     <Cloud size={32} className="text-purple-600 mr-3" />
                     <span className="font-bold text-lg text-purple-800">IoT Devices & Chargers</span>
                   </div>
                 </div>
               </div>
             </div>
-            {/* --- END OF FIX --- */}
           </div>
         )}
 
-        {/* Components Tab */}
+        {/* Components Tab (Responsive grid) */}
         {activeTab === 'components' && (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold mb-6 text-indigo-900">Component-by-Component Comparison</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900">Component-by-Component Comparison</h2>
             {Object.entries(componentComparison).map(([key, comp]) => (
               <div key={key} className="bg-white rounded-xl shadow-xl p-6">
-                <h3 className="text-2xl font-bold mb-4 text-indigo-800">{comp.name}</h3>
+                <h3 className="text-xl md:text-2xl font-bold mb-4 text-indigo-800">{comp.name}</h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="border-2 border-red-300 rounded-lg p-4 bg-red-50">
                     <h4 className="font-bold text-xl mb-2 text-red-700">Client Choice</h4>
@@ -912,17 +914,17 @@ const ArchitectureComparison = () => {
                     <p className="text-2xl font-bold text-red-600 mb-3">{comp.client.cost}</p>
                     <div className="mb-3">
                       <p className="font-semibold text-green-700 mb-1">Pros:</p>
-                      <ul className="list-disc list-inside space-y-1">
+                      <ul className="list-disc list-inside space-y-1 text-sm">
                         {comp.client.pros.map((pro, i) => (
-                          <li key={i} className="text-sm">{pro}</li>
+                          <li key={i}>{pro}</li>
                         ))}
                       </ul>
                     </div>
                     <div>
                       <p className="font-semibold text-red-700 mb-1">Cons:</p>
-                      <ul className="list-disc list-inside space-y-1">
+                      <ul className="list-disc list-inside space-y-1 text-sm">
                         {comp.client.cons.map((con, i) => (
-                          <li key={i} className="text-sm">{con}</li>
+                          <li key={i}>{con}</li>
                         ))}
                       </ul>
                     </div>
@@ -933,17 +935,17 @@ const ArchitectureComparison = () => {
                     <p className="text-2xl font-bold text-green-600 mb-3">{comp.proposed.cost}</p>
                     <div className="mb-3">
                       <p className="font-semibold text-green-700 mb-1">Pros:</p>
-                      <ul className="list-disc list-inside space-y-1">
+                      <ul className="list-disc list-inside space-y-1 text-sm">
                         {comp.proposed.pros.map((pro, i) => (
-                          <li key={i} className="text-sm">{pro}</li>
+                          <li key={i}>{pro}</li>
                         ))}
                       </ul>
                     </div>
                     <div>
                       <p className="font-semibold text-red-700 mb-1">Cons:</p>
-                      <ul className="list-disc list-inside space-y-1">
+                      <ul className="list-disc list-inside space-y-1 text-sm">
                         {comp.proposed.cons.map((con, i) => (
-                          <li key={i} className="text-sm">{con}</li>
+                          <li key={i}>{con}</li>
                         ))}
                       </ul>
                     </div>
@@ -954,11 +956,11 @@ const ArchitectureComparison = () => {
           </div>
         )}
 
-        {/* Databases Tab */}
+        {/* Databases Tab (Responsive grid) */}
         {activeTab === 'databases' && (
           <div className="bg-white rounded-xl shadow-xl p-8">
-            <h2 className="text-3xl font-bold mb-6 text-indigo-900">Database Strategy: Polyglot Persistence</h2>
-            <p className="text-lg mb-8 text-gray-700">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900">Database Strategy: Polyglot Persistence</h2>
+            <p className="text-base md:text-lg mb-8 text-gray-700">
               We leverage <strong>specialized databases</strong> for optimal performance and cost efficiency, ensuring we use the right tool for each data type (transactional, time-series, and relational data).
             </p>
             <div className="grid md:grid-cols-2 gap-6">
@@ -967,17 +969,17 @@ const ArchitectureComparison = () => {
                   <div className="flex items-start gap-4">
                     <Database className="text-indigo-600 flex-shrink-0 mt-1" size={32} />
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold mb-2 text-indigo-800">{db.name}</h3>
+                      <h3 className="text-xl md:text-2xl font-bold mb-2 text-indigo-800">{db.name}</h3>
                       <div className="mb-3">
-                        <p className="font-semibold text-gray-700">What it stores:</p>
+                        <p className="font-semibold text-gray-700 text-base">What it stores:</p>
                         <p className="text-gray-600 text-sm">{db.useCase}</p>
                       </div>
                       <div className="mb-3">
-                        <p className="font-semibold text-gray-700">Why this database:</p>
+                        <p className="font-semibold text-gray-700 text-base">Why this database:</p>
                         <p className="text-gray-600 text-sm">{db.why}</p>
                       </div>
                       <div className="bg-green-100 border border-green-300 rounded p-3">
-                        <p className="font-bold text-green-700">Cost: {db.cost}</p>
+                        <p className="font-bold text-green-700 text-sm md:text-base">Cost: {db.cost}</p>
                       </div>
                     </div>
                   </div>
@@ -990,17 +992,17 @@ const ArchitectureComparison = () => {
         {/* Architecture Tab */}
         {activeTab === 'architecture' && (
           <div className="bg-white rounded-xl shadow-xl p-8">
-            <h2 className="text-3xl font-bold mb-6 text-indigo-900">Clean Architecture Explained</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900">Clean Architecture Explained</h2>
 
             {architectureTypes.map((arch, idx) => (
               <div key={idx} className="mb-8">
-                <h3 className="text-2xl font-bold mb-4 text-indigo-800">{arch.title}</h3>
-                <p className="text-lg mb-6 text-gray-700">{arch.description}</p>
+                <h3 className="text-xl md:text-2xl font-bold mb-4 text-indigo-800">{arch.title}</h3>
+                <p className="text-base md:text-lg mb-6 text-gray-700">{arch.description}</p>
                 <div className="space-y-4 mb-6">
                   {arch.layers.map((layer, i) => (
                     <div key={i} className="border-l-4 border-indigo-500 pl-4 py-3 bg-indigo-50">
                       <h4 className="font-bold text-lg text-indigo-800">Layer {i + 1}: {layer.name}</h4>
-                      <p className="text-gray-700">{layer.desc}</p>
+                      <p className="text-gray-700 text-sm">{layer.desc}</p>
                     </div>
                   ))}
                 </div>
@@ -1008,7 +1010,7 @@ const ArchitectureComparison = () => {
                   <h4 className="font-bold text-xl mb-4 text-green-800">Key Benefits:</h4>
                   <ul className="space-y-3">
                     {arch.benefits.map((benefit, i) => (
-                      <li key={i} className="flex gap-2">
+                      <li key={i} className="flex gap-2 text-sm md:text-base">
                         <Check className="text-green-500 flex-shrink-0 mt-1" size={20} />
                         <span className="text-gray-700">{benefit}</span>
                       </li>
@@ -1020,10 +1022,10 @@ const ArchitectureComparison = () => {
           </div>
         )}
 
-        {/* Cost Tab */}
+        {/* Cost Tab (Responsive tables with overflow-x-auto) */}
         {activeTab === 'cost' && (
           <div className="bg-white rounded-xl shadow-xl p-8">
-            <h2 className="text-3xl font-bold mb-8 text-indigo-900">Detailed Cost Comparison</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-8 text-indigo-900">Detailed Cost Comparison</h2>
 
             <CostComparisonChart
               phase="MVP (0-6 months, 100-500 devices)"
@@ -1044,17 +1046,18 @@ const ArchitectureComparison = () => {
             {/* Detailed breakdown table */}
             <div className="mt-8">
               <h3 className="text-2xl font-bold mb-4 text-indigo-800">Component-wise Cost Breakdown (Growth Phase)</h3>
+              {/* Universal Fix: Ensure tables do not cause overflow by allowing horizontal scrolling */}
               <div className="overflow-x-auto">
                 <table className="min-w-full border-collapse">
                   <thead>
-                    <tr className="bg-indigo-600 text-white">
+                    <tr className="bg-indigo-600 text-white text-sm md:text-base">
                       <th className="border p-3 text-left">Component</th>
                       <th className="border p-3 text-right">Client (Azure)</th>
                       <th className="border p-3 text-right">Proposed</th>
                       <th className="border p-3 text-right">Savings</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="text-sm md:text-base">
                     {Object.keys(costBreakdown.client.growth).filter(k => k !== 'total').map(component => (
                       <tr key={component} className="hover:bg-gray-50">
                         <td className="border p-3 capitalize font-semibold">{component}</td>
@@ -1069,7 +1072,7 @@ const ArchitectureComparison = () => {
                         </td>
                       </tr>
                     ))}
-                    <tr className="bg-gray-100 font-bold text-lg">
+                    <tr className="bg-gray-100 font-bold text-base md:text-lg">
                       <td className="border p-3">TOTAL</td>
                       <td className="border p-3 text-right text-red-700">
                         ${costBreakdown.client.growth.total}
@@ -1077,7 +1080,7 @@ const ArchitectureComparison = () => {
                       <td className="border p-3 text-right text-green-700">
                         ${costBreakdown.proposed.growth.total}
                       </td>
-                      <td className="border p-3 text-right text-green-700 text-xl">
+                      <td className="border p-3 text-right text-green-700 text-lg md:text-xl">
                         ${costBreakdown.client.growth.total - costBreakdown.proposed.growth.total}/mo
                       </td>
                     </tr>
@@ -1088,10 +1091,10 @@ const ArchitectureComparison = () => {
           </div>
         )}
 
-        {/* --- COMBINED AGILE FEATURE ROADMAP TAB (NEW) --- */}
+        {/* --- COMBINED AGILE FEATURE ROADMAP TAB --- */}
         {activeTab === 'agile_feature_roadmap' && renderAgileRoadmap(combinedAgileRoadmap)}
 
-        {/* --- TECHNICAL ROADMAP TAB (Existing) --- */}
+        {/* --- TECHNICAL ROADMAP TAB --- */}
         {activeTab === 'technical_roadmap' && renderSingleRoadmap(
           technicalRoadmap,
           "Technical Roadmap: Backend & Infrastructure (8 Weeks)",
@@ -1099,7 +1102,7 @@ const ArchitectureComparison = () => {
           'blue'
         )}
 
-        {/* --- UI/UX ROADMAP TAB (Existing) --- */}
+        {/* --- UI/UX ROADMAP TAB --- */}
         {activeTab === 'ui_ux_roadmap' && renderSingleRoadmap(
           uiUxRoadmap,
           "UI/UX Roadmap: Design & User Experience (8 Weeks)",
@@ -1107,7 +1110,7 @@ const ArchitectureComparison = () => {
           'indigo'
         )}
 
-        {/* --- AI/ML ROADMAP TAB (Existing) --- */}
+        {/* --- AI/ML ROADMAP TAB --- */}
         {activeTab === 'ai_ml_roadmap' && renderSingleRoadmap(
           aiMlRoadmap,
           "AI/ML Roadmap: Intelligence & Analytics (8 Weeks)",
