@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
   ArrowRight, DollarSign, Database, Shield, Zap, Cloud, Check, X, Info, Layers,
-  Code, Terminal, Server, MessageSquare, HardDrive, Cpu, ShoppingCart, TrendingUp, Home, Calendar, Clock, Lock, Truck, Repeat,
-  Palette, Brain, Aperture, Power, GitBranch, Menu, X as CloseIcon, ChevronDown, ChevronUp
+  Workflow as WorkflowIcon, Code, Terminal, Server, MessageSquare, HardDrive,
+  Cpu, ShoppingCart, TrendingUp, Home, Calendar, Clock, Lock, Truck, Repeat,
+  Feather, Layout, Palette, Brain, Target, Aperture, Power, GitBranch
 } from 'lucide-react';
 
 // --- DATA DEFINITION (CORE COMPONENTS & WORKFLOWS) ---
@@ -160,7 +161,7 @@ const architectureTypes = [
   }
 ];
 
-// --- FEATURE ROADMAP DATA ---
+// --- FEATURE ROADMAP DATA (Updated with <strong> tags) ---
 
 const customerFeatureRoadmap = [
   {
@@ -278,7 +279,7 @@ const combinedAgileRoadmap = customerFeatureRoadmap.map((customerSprint, index) 
   admin: adminFeatureRoadmap[index],
 }));
 
-// Technical Roadmap Data
+// Technical Roadmap Data (Updated with <strong> tags)
 const technicalRoadmap = [
   {
     sprint: 1,
@@ -334,7 +335,7 @@ const technicalRoadmap = [
   },
 ];
 
-// UI/UX Roadmap Data
+// UI/UX Roadmap Data (Updated with <strong> tags)
 const uiUxRoadmap = [
   {
     sprint: 1,
@@ -390,7 +391,7 @@ const uiUxRoadmap = [
   },
 ];
 
-// AI/ML Roadmap Data
+// AI/ML Roadmap Data (Updated with <strong> tags)
 const aiMlRoadmap = [
   {
     sprint: 1,
@@ -457,9 +458,9 @@ const tabLabels = {
   databases: 'Database Strategy',
   architecture: 'Clean Architecture',
   cost: 'Cost Breakdown',
-  technical_roadmap: 'Technical Roadmap (8 Wks)',
-  ui_ux_roadmap: 'UI/UX Roadmap (8 Wks)',
-  ai_ml_roadmap: 'AI/ML Roadmap (8 Wks)',
+  technical_roadmap: 'Technical (8 Wks)',
+  ui_ux_roadmap: 'UI/UX (8 Wks)',
+  ai_ml_roadmap: 'AI/ML (8 Wks)',
   agile_feature_roadmap: 'Agile Feature Roadmap (CUST & ADMIN)', // Combined
 };
 
@@ -639,17 +640,7 @@ const renderSingleRoadmap = (roadmap, title, icon, color) => (
 // --- MAIN COMPONENT ---
 
 const ArchitectureComparison = () => {
-  // 1. UPDATED: Default tab set to 'overview' (Quick Summary)
-  const [activeTab, setActiveTab] = useState('overview');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
-    // Close menu after selection on mobile
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
-  };
+  const [activeTab, setActiveTab] = useState('agile_feature_roadmap'); // Default to new tab
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
@@ -658,44 +649,12 @@ const ArchitectureComparison = () => {
           Wezu Smart Battery System - Strategic Architecture & Roadmap
         </h1>
 
-        {/* --- Tab Navigation --- */}
-
-        {/* 2. MOBILE HAMBURGER BUTTON (visible only on mobile) */}
-        <div className="block md:hidden mb-4">
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg font-semibold flex items-center justify-between shadow-md hover:bg-indigo-700 transition"
-          >
-            <span>{tabLabels[activeTab]}</span>
-            {isMobileMenuOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </button>
-
-          {/* Mobile Dropdown Menu */}
-          {isMobileMenuOpen && (
-            <div className="mt-2 bg-white border border-indigo-200 rounded-lg shadow-xl max-h-80 overflow-y-auto">
-              {tabOrder.map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => handleTabClick(tab)}
-                  className={`w-full text-left px-4 py-3 text-sm font-medium transition ${activeTab === tab
-                    ? 'bg-indigo-100 text-indigo-800'
-                    : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                >
-                  {tabLabels[tab]}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-
-        {/* LAPTOP/DESKTOP TABS (hidden on mobile) */}
-        <div className="hidden md:flex gap-2 mb-8 overflow-x-auto bg-white rounded-xl p-2 shadow-xl border border-indigo-200">
+        {/* Tab Navigation */}
+        <div className="flex gap-2 mb-8 overflow-x-auto bg-white rounded-xl p-2 shadow-xl border border-indigo-200">
           {tabOrder.map(tab => (
             <button
               key={tab}
-              onClick={() => handleTabClick(tab)}
+              onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold text-sm md:text-base transition whitespace-nowrap flex-shrink-0 ${activeTab === tab
                 ? 'bg-indigo-600 text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700'
@@ -706,7 +665,7 @@ const ArchitectureComparison = () => {
           ))}
         </div>
 
-        {/* --- TABS CONTENT --- */}
+        {/* --- TABS --- */}
 
         {/* Overview Tab */}
         {activeTab === 'overview' && (
