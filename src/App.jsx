@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ArrowRight, DollarSign, Database, Shield, Zap, Cloud, Check, X, Info, Layers,
   Workflow as WorkflowIcon, Code, Terminal, Server, MessageSquare, HardDrive,
   Cpu, ShoppingCart, TrendingUp, Home, Calendar, Clock, Lock, Truck, Repeat,
-  Feather, Layout, Palette, Brain, Target, Aperture, Power, GitBranch
+  Feather, Layout, Palette, Brain, Target, Aperture, Power, GitBranch, Sun, Moon,
+  Menu, BarChart, TrendingDown, IndianRupee, PieChart
 } from 'lucide-react';
 
 // --- DATA DEFINITION (CORE COMPONENTS & WORKFLOWS) ---
+
+const USD_TO_INR_RATE = 83; // Conversion rate: 1 USD = 83 INR
+
+const convertToINR = (usd) => Math.round(usd * USD_TO_INR_RATE);
+const formatINR = (amount) => `₹${amount.toLocaleString('en-IN')}`;
+const formatINRProjection = (amount) => {
+  // 1 Lakh = 1,00,000, 1 Crore = 1,00,00,000
+  if (amount >= 10000000) {
+    return `${(amount / 10000000).toFixed(2)} Crore`;
+  } else if (amount >= 100000) {
+    return `${(amount / 100000).toFixed(2)} Lakh`;
+  }
+  return formatINR(amount);
+};
+const formatUSD = (amount) => `$${amount.toLocaleString()}`;
+
 
 const componentComparison = {
   messaging: {
@@ -106,25 +123,25 @@ const databaseExplanation = {
     name: "PostgreSQL (Relational)",
     useCase: "User accounts, transactions, invoices, rental contracts, payment records, Master Inventory",
     why: "Perfect for structured data that needs ACID compliance (financial data, user management, and master inventory lists)",
-    cost: "$50-100/month (managed: AWS RDS/DigitalOcean)"
+    cost: "$50-100/month (managed: AWS RDS/DigitalOcean)" // Reverted to USD
   },
   timescaledb: {
     name: "TimescaleDB (Time-Series)",
     useCase: "Battery telemetry: voltage, temperature, SOC, current, charging cycles over time",
     why: "Optimized for high-volume, time-stamped IoT data with automatic data retention policies and fast aggregations",
-    cost: "$100-250/month (self-hosted on Kubernetes or managed cloud)"
+    cost: "$100-250/month (self-hosted on Kubernetes or managed cloud)" // Reverted to USD
   },
   neo4j: {
     name: "Neo4j (Graph)",
     useCase: "Relationships: Customer→Battery→Vehicle→Charger→Dealer/Station, Fraud detection, Availability mapping",
     why: "Excels at complex relationship queries like 'find all batteries at Dealer X that are available for rent'",
-    cost: "$150-400/month (Aura managed or self-hosted)"
+    cost: "$150-400/month (Aura managed or self-hosted)" // Reverted to USD
   },
   redis: {
     name: "Redis (Cache & Queue)",
     useCase: "Session management, real-time device state (SOC, Location), job queues, rate limiting",
     why: "In-memory speed for frequently accessed data and message queuing for high-speed device state updates",
-    cost: "$30-80/month (managed: AWS ElastiCache/Upstash)"
+    cost: "$30-80/month (managed: AWS ElastiCache/Upstash)" // Reverted to USD
   }
 };
 
@@ -161,7 +178,7 @@ const architectureTypes = [
   }
 ];
 
-// --- FEATURE ROADMAP DATA (Updated with <strong> tags) ---
+// ... (Roadmap data remains the same)
 
 const customerFeatureRoadmap = [
   {
@@ -273,13 +290,11 @@ const adminFeatureRoadmap = [
   },
 ];
 
-// Combine the two roadmaps into a single array for easier iteration
 const combinedAgileRoadmap = customerFeatureRoadmap.map((customerSprint, index) => ({
   customer: customerSprint,
   admin: adminFeatureRoadmap[index],
 }));
 
-// Technical Roadmap Data (Updated with <strong> tags)
 const technicalRoadmap = [
   {
     sprint: 1,
@@ -335,7 +350,6 @@ const technicalRoadmap = [
   },
 ];
 
-// UI/UX Roadmap Data (Updated with <strong> tags)
 const uiUxRoadmap = [
   {
     sprint: 1,
@@ -391,7 +405,6 @@ const uiUxRoadmap = [
   },
 ];
 
-// AI/ML Roadmap Data (Updated with <strong> tags)
 const aiMlRoadmap = [
   {
     sprint: 1,
@@ -450,118 +463,272 @@ const aiMlRoadmap = [
 
 // --- UI HELPERS ---
 
-// Renaming workflow labels to be more persona/Agile focused
 const tabLabels = {
   overview: 'Quick Summary',
   diagram: 'Architecture Diagram',
+  cost: 'Cost Breakdown & Projection', // Updated label
   components: 'Component Comparison',
   databases: 'Database Strategy',
   architecture: 'Clean Architecture',
-  cost: 'Cost Breakdown',
   technical_roadmap: 'Technical (8 Wks)',
   ui_ux_roadmap: 'UI/UX (8 Wks)',
   ai_ml_roadmap: 'AI/ML (8 Wks)',
-  agile_feature_roadmap: 'Agile Feature Roadmap (CUST & ADMIN)', // Combined
+  agile_feature_roadmap: 'Agile Feature Roadmap',
 };
 
-// Updated tab order
+// Reordered as requested: cost after diagram
 const tabOrder = [
   'overview',
   'diagram',
+  'cost', // MOVED HERE
   'components',
   'databases',
   'architecture',
-  'cost',
-  'agile_feature_roadmap', // Single combined tab
+  'agile_feature_roadmap',
   'technical_roadmap',
   'ui_ux_roadmap',
   'ai_ml_roadmap',
 ];
 
+// --- THEME & STYLING LOGIC ---
 
-const CostComparisonChart = ({ phase, clientCost, proposedCost }) => {
-  const maxCost = Math.max(clientCost, proposedCost);
-  const clientWidth = (clientCost / maxCost) * 100;
-  const proposedWidth = (proposedCost / maxCost) * 100;
-  const savings = ((clientCost - proposedCost) / clientCost * 100).toFixed(0);
+const getThemeStyles = (isDark) => ({
+  // General
+  bgPrimary: isDark ? 'bg-gradient-to-br from-gray-900 to-slate-950' : 'bg-gradient-to-br from-indigo-50 to-pink-100',
+  bgContainer: isDark ? 'bg-gray-800' : 'bg-white',
+  textPrimary: isDark ? 'text-white' : 'text-gray-900',
+  textSecondary: isDark ? 'text-pink-300' : 'text-pink-700',
+  textBody: isDark ? 'text-gray-300' : 'text-gray-700',
+  borderSecondary: isDark ? 'border-gray-700' : 'border-pink-200',
+
+  // NEW: Glassmorphism / Frosted Glass effect
+  bgGlass: isDark ? 'bg-gray-900/80 backdrop-blur-xl border-gray-700/50' : 'bg-white/70 backdrop-blur-xl border-pink-200/50',
+
+  // Accents (Pink/Teal)
+  accentColor: isDark ? 'text-pink-400' : 'text-pink-600',
+  accentBg: isDark ? 'bg-pink-600 hover:bg-pink-700' : 'bg-pink-500 hover:bg-pink-600',
+  accentBorder: isDark ? 'border-pink-700' : 'border-pink-500',
+
+  // Tab Specific (These are for the menu now)
+  menuItemActive: isDark ? 'bg-pink-600 text-white shadow-lg shadow-pink-400/50' : 'bg-pink-600 text-white shadow-lg shadow-pink-400/50',
+  menuItemInactive: isDark ? 'bg-gray-800 text-gray-200 hover:bg-pink-700 hover:text-white' : 'bg-white text-gray-700 hover:bg-pink-50 hover:text-pink-700',
+
+  // Cost/Comparison Colors
+  goodText: isDark ? 'text-teal-400' : 'text-teal-700',
+  goodBg: isDark ? 'bg-teal-900 border-teal-700' : 'bg-teal-50 border-teal-300',
+  badText: isDark ? 'text-rose-400' : 'text-rose-700',
+  badBg: isDark ? 'bg-rose-900 border-rose-700' : 'bg-rose-50 border-rose-300',
+  barFillClient: isDark ? 'bg-rose-500' : 'bg-rose-500',
+  barFillProposed: isDark ? 'bg-teal-500' : 'bg-teal-500',
+  savingsBanner: isDark ? 'bg-gradient-to-r from-teal-700 to-green-800 text-white border-white' : 'bg-gradient-to-r from-teal-500 to-green-600 text-white border-white',
+});
+
+// A reusable Tailwind class for advanced, floating 3D effect on hover
+const FLOATING_CARD_EFFECT = "transform hover:scale-[1.03] hover:-translate-y-1 hover:shadow-2xl transition duration-500 ease-in-out";
+
+
+const ContentTransitionWrapper = ({ children, activeTab }) => {
+  return (
+    <div
+      key={activeTab}
+      className="opacity-0 animate-fade-in"
+      style={{ animation: 'fade-in 0.5s ease-out forwards' }}
+    >
+      {children}
+    </div>
+  );
+};
+
+
+const CostComparisonChart = React.memo(({ phase, clientCost, proposedCost, themeClasses, isDark }) => {
+  // Monthly costs are in USD for the chart display
+  const clientCostUSD = clientCost;
+  const proposedCostUSD = proposedCost;
+
+  // Calculations for INR projection (the requested "small projection" part)
+  const clientCostINR = convertToINR(clientCostUSD);
+  const proposedCostINR = convertToINR(proposedCostUSD);
+
+  const maxCost = Math.max(clientCostUSD, proposedCostUSD);
+  const clientWidth = (clientCostUSD / maxCost) * 100;
+  const proposedWidth = (proposedCostUSD / maxCost) * 100;
+
+  const savingsMonthlyUSD = clientCostUSD - proposedCostUSD;
+  const savingsPercentage = ((clientCostUSD - proposedCostUSD) / clientCostUSD * 100).toFixed(0);
+
+  // Annual Savings in INR (for projection effect)
+  const savingsAnnualINR = (clientCostINR - proposedCostINR) * 12;
+
+  // Annual Costs in USD for display
+  const clientAnnualCostUSD = clientCostUSD * 12;
+  const proposedAnnualCostUSD = proposedCostUSD * 12;
 
   return (
-    <div className="mb-8">
-      <h3 className="text-xl font-bold mb-4">{phase} Phase</h3>
-      <div className="space-y-4">
+    <div className={`mb-8 p-6 rounded-xl shadow-lg ${themeClasses.bgContainer} ${FLOATING_CARD_EFFECT}`}>
+      <h3 className={`text-xl font-bold mb-4 ${themeClasses.textSecondary}`}>{phase} Phase</h3>
+      <div className="space-y-6">
         <div>
           <div className="flex justify-between mb-2">
-            <span className="font-semibold text-red-600">Client Architecture (Azure-heavy)</span>
-            <span className="font-bold text-red-600">${clientCost.toLocaleString()}/month</span>
+            <span className={`font-semibold ${themeClasses.badText} flex items-center gap-1`}>
+              <ArrowRight size={18} className={themeClasses.badText.replace('text', '')} /> Client Architecture (Azure-heavy)
+            </span>
+            {/* Display Monthly in USD, Annual in USD */}
+            <span className={`font-bold ${themeClasses.badText} text-xl flex items-center`}>
+              {formatUSD(clientCostUSD)}/month
+              <span className="text-sm font-normal ml-2 opacity-70">({formatUSD(clientAnnualCostUSD)}/year)</span>
+            </span>
           </div>
-          <div className="bg-gray-200 rounded-full h-8">
+          <div className="bg-gray-200 rounded-full h-8 overflow-hidden">
             <div
-              className="bg-red-500 h-8 rounded-full flex items-center justify-end pr-4 text-white font-semibold"
+              className={`${themeClasses.barFillClient} h-8 rounded-full flex items-center justify-end pr-4 text-white font-semibold transition-all duration-1000 ease-out`}
               style={{ width: `${clientWidth}%` }}
             >
-              ${clientCost.toLocaleString()}
+              {formatUSD(clientCostUSD)}
             </div>
           </div>
         </div>
 
         <div>
           <div className="flex justify-between mb-2">
-            <span className="font-semibold text-green-600">Proposed Architecture (Multi-cloud)</span>
-            <span className="font-bold text-green-600">${proposedCost.toLocaleString()}/month</span>
+            <span className={`font-semibold ${themeClasses.goodText} flex items-center gap-1`}>
+              <Check size={18} className={themeClasses.goodText.replace('text', '')} /> Proposed Architecture (Multi-cloud)
+            </span>
+            {/* Display Monthly in USD, Annual in USD */}
+            <span className={`font-bold ${themeClasses.goodText} text-xl flex items-center`}>
+              {formatUSD(proposedCostUSD)}/month
+              <span className="text-sm font-normal ml-2 opacity-70">({formatUSD(proposedAnnualCostUSD)}/year)</span>
+            </span>
           </div>
-          <div className="bg-gray-200 rounded-full h-8">
+          <div className="bg-gray-200 rounded-full h-8 overflow-hidden">
             <div
-              className="bg-green-500 h-8 rounded-full flex items-center justify-end pr-4 text-white font-semibold"
+              className={`${themeClasses.barFillProposed} h-8 rounded-full flex items-center justify-end pr-4 text-white font-semibold transition-all duration-1000 ease-out`}
               style={{ width: `${proposedWidth}%` }}
             >
-              ${proposedCost.toLocaleString()}
+              {formatUSD(proposedCostUSD)}
             </div>
           </div>
         </div>
 
-        <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center">
-          <span className="text-2xl font-bold text-green-700">
-            💰 Save {savings}% = ${(clientCost - proposedCost).toLocaleString()}/month
+        {/* SAVINGS BANNER: Monthly in USD, Annual Projection in INR */}
+        <div className={`${themeClasses.savingsBanner} rounded-lg p-5 text-center shadow-lg transform hover:scale-[1.02] transition duration-300`}>
+          <span className="text-3xl font-extrabold text-white flex flex-col items-center justify-center gap-1">
+            <span className="flex items-center gap-3">
+              <IndianRupee size={32} /> {/* Using INR icon for the projection effect */}
+              YOU SAVE {savingsPercentage}% = {formatUSD(savingsMonthlyUSD)}/month
+            </span>
+            <span className="text-xl font-semibold mt-2">
+              ANNUAL SAVINGS (INR Projection): {formatINRProjection(savingsAnnualINR)}
+            </span>
           </span>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// Advanced Navigation Menu Component
+const AdvancedTechMenu = ({ isMenuOpen, onClose, activeTab, setActiveTab, tabOrder, tabLabels, themeClasses }) => {
+  const menuItems = tabOrder.map(tab => ({
+    key: tab,
+    label: tabLabels[tab],
+    icon: (() => {
+      switch (tab) {
+        case 'overview': return <PieChart size={20} />;
+        case 'diagram': return <Layers size={20} />;
+        case 'cost': return <IndianRupee size={20} />;
+        case 'components': return <Cpu size={20} />;
+        case 'databases': return <Database size={20} />;
+        case 'architecture': return <GitBranch size={20} />;
+        case 'agile_feature_roadmap': return <WorkflowIcon size={20} />;
+        case 'technical_roadmap': return <Server size={20} />;
+        case 'ui_ux_roadmap': return <Palette size={20} />;
+        case 'ai_ml_roadmap': return <Brain size={20} />;
+        default: return <Info size={20} />;
+      }
+    })()
+  }));
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+      onClick={onClose} // Close when clicking outside
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+      {/* Menu Drawer */}
+      <div
+        // Added high scrolling area for the drawer and tech-y shadow
+        className={`fixed top-0 right-0 h-full w-80 p-6 shadow-3xl transition-transform duration-500 ease-in-out ${themeClasses.bgGlass} border-l ${themeClasses.borderSecondary}`}
+        style={{ transform: isMenuOpen ? 'translateX(0)' : 'translateX(100%)' }}
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the menu
+      >
+        <div className="flex justify-between items-center mb-8">
+          <h3 className={`text-xl font-extrabold ${themeClasses.accentColor} flex items-center gap-2`}>
+            <Terminal size={24} className="animate-pulse" />
+            SYSTEM NAVIGATOR
+          </h3>
+          <button onClick={onClose} className={`p-2 rounded-full ${themeClasses.accentBg} text-white hover:ring-2 ring-pink-400 transition`}>
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* SCROLLABLE MENU CONTENT AREA */}
+        <div className="space-y-4 h-[calc(100vh-100px)] overflow-y-auto pr-2">
+          {menuItems.map((item) => (
+            <button
+              key={item.key}
+              // Added high animation and shadow effects for 'advanced tech' feel
+              className={`w-full text-left flex items-center gap-3 p-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-[1.05] hover:shadow-2xl ${activeTab === item.key ? themeClasses.menuItemActive + ' animate-pulse-slow shadow-pink-600/70' : themeClasses.menuItemInactive
+                }`}
+              onClick={() => {
+                setActiveTab(item.key);
+                onClose();
+              }}
+            >
+              <span className="flex-shrink-0">{item.icon}</span>
+              <span className="text-lg">{item.label}</span>
+            </button>
+          ))}
         </div>
       </div>
     </div>
   );
 };
 
-// Simplified rendering logic to remove .replace()
-const renderAgileRoadmap = (combinedRoadmap) => (
-  <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-    <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900 flex items-center gap-2">
-      <GitBranch size={30} />
+// ... (renderAgileRoadmap and renderSingleRoadmap remain the same as they only use theme classes)
+const renderAgileRoadmap = (combinedRoadmap, themeClasses, isDark) => (
+  <div className={`rounded-xl shadow-2xl p-8 ${themeClasses.bgContainer}`}>
+    <h2 className={`text-3xl font-bold mb-6 ${themeClasses.textPrimary} flex items-center gap-2`}>
+      <GitBranch size={30} className={`animate-pulse ${themeClasses.accentColor.replace('text', '')}`} />
       Agile Feature Roadmap (8-Week MVP)
     </h2>
-    <p className="text-base md:text-lg mb-8 text-gray-700">
+    <p className={`text-lg mb-8 ${themeClasses.textBody}`}>
       This integrated roadmap shows parallel feature development for the core customer application and the internal administration portal across four 2-week sprints.
     </p>
 
     <div className="space-y-12">
       {combinedRoadmap.map((sprintGroup, index) => (
-        <div key={index} className="border-4 border-indigo-500 rounded-xl p-4 md:p-6 bg-indigo-50 relative">
-          <div className="absolute -top-4 left-4 bg-indigo-700 text-white text-xs md:text-sm px-3 md:px-4 py-1 rounded-full font-bold shadow-lg">
+        <div key={index} className={`border-4 ${themeClasses.accentBorder} rounded-xl p-6 relative shadow-xl ${themeClasses.bgContainer} ${FLOATING_CARD_EFFECT}`}>
+          <div className={`absolute -top-4 left-4 ${themeClasses.accentBg} text-white text-sm px-4 py-1 rounded-full font-bold shadow-lg transform rotate-[-1deg] hover:rotate-0 transition duration-300`}>
             {`SPRINT ${sprintGroup.customer.sprint}: 2 WEEKS`}
           </div>
 
-          <h3 className="text-xl md:text-2xl font-bold text-indigo-900 pt-4 mb-4 md:mb-6">
+          <h3 className={`text-2xl font-bold ${themeClasses.textPrimary} pt-4 mb-6 border-b-2 ${themeClasses.borderSecondary} pb-2`}>
             Sprint {sprintGroup.customer.sprint} Focus: {sprintGroup.customer.theme} & {sprintGroup.admin.theme}
           </h3>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
 
             {/* Customer Deliverables Column */}
-            <div className="bg-white rounded-lg p-4 shadow-lg border-t-4 border-green-500">
+            <div className={`rounded-lg p-5 shadow-lg border-t-4 border-teal-500 ${themeClasses.bgContainer} transform hover:shadow-xl transition duration-300`}>
               <div className="flex items-center gap-3 mb-4">
-                <ShoppingCart size={24} className="text-green-600" />
-                <h4 className="text-lg md:text-xl font-bold text-green-700">Customer Focus: {sprintGroup.customer.title}</h4>
+                <ShoppingCart size={24} className="text-teal-600 animate-bounce" style={{ '--animation-delay': '0s' }} />
+                <h4 className={`text-xl font-bold text-teal-700 ${isDark ? 'text-teal-400' : ''}`}>Customer Focus: {sprintGroup.customer.title}</h4>
               </div>
               <ul className="space-y-3">
                 {sprintGroup.customer.deliverables.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-gray-700 text-sm md:text-base">
+                  <li key={i} className={`flex items-start gap-2 ${themeClasses.textBody} text-base border-b border-gray-100 pb-1`}>
                     <div className="text-xl flex-shrink-0 mt-1">{item.icon}</div>
                     <span dangerouslySetInnerHTML={{ __html: item.desc }}></span>
                   </li>
@@ -570,14 +737,14 @@ const renderAgileRoadmap = (combinedRoadmap) => (
             </div>
 
             {/* Admin Deliverables Column */}
-            <div className="bg-white rounded-lg p-4 shadow-lg border-t-4 border-red-500">
+            <div className={`rounded-lg p-5 shadow-lg border-t-4 border-rose-500 ${themeClasses.bgContainer} transform hover:shadow-xl transition duration-300`}>
               <div className="flex items-center gap-3 mb-4">
-                <TrendingUp size={24} className="text-red-600" />
-                <h4 className="text-lg md:text-xl font-bold text-red-700">Admin/Ops Focus: {sprintGroup.admin.title}</h4>
+                <TrendingUp size={24} className="text-rose-600 animate-bounce" style={{ '--animation-delay': '0.2s' }} />
+                <h4 className={`text-xl font-bold text-rose-700 ${isDark ? 'text-rose-400' : ''}`}>Admin/Ops Focus: {sprintGroup.admin.title}</h4>
               </div>
               <ul className="space-y-3">
                 {sprintGroup.admin.deliverables.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-gray-700 text-sm md:text-base">
+                  <li key={i} className={`flex items-start gap-2 ${themeClasses.textBody} text-base border-b border-gray-100 pb-1`}>
                     <div className="text-xl flex-shrink-0 mt-1">{item.icon}</div>
                     <span dangerouslySetInnerHTML={{ __html: item.desc }}></span>
                   </li>
@@ -591,532 +758,716 @@ const renderAgileRoadmap = (combinedRoadmap) => (
   </div>
 );
 
-// Simplified rendering logic to remove .replace()
-const renderSingleRoadmap = (roadmap, title, icon, color) => (
-  // Used for Technical, UI/UX, AI/ML roadmaps
-  <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-    <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900 flex items-center gap-2">
-      {icon}
-      {title}
-    </h2>
-    <p className="text-base md:text-lg mb-8 text-gray-700">
-      This is an <strong>8-week MVP roadmap</strong> (four 2-week sprints) focusing on delivering core value quickly with clear, tangible results at each stage.
-    </p>
-
-    <div className="space-y-10">
-      {roadmap.map((sprint, index) => (
-        <div key={index} className={`border-4 border-${color}-200 rounded-xl p-4 md:p-6 bg-${color}-50 relative`}>
-          {/* Using fixed indigo-700 for high contrast on the sprint label */}
-          <div className="absolute -top-4 left-4 bg-indigo-700 text-white text-xs md:text-sm px-3 md:px-4 py-1 rounded-full font-bold shadow-lg">
-            {`SPRINT ${sprint.sprint}: ${sprint.duration}`}
-          </div>
-
-          <div className="flex items-center gap-4 pt-4 mb-4">
-            <div className="text-4xl md:text-5xl flex-shrink-0">{sprint.icon}</div>
-            <div>
-              <h3 className={`text-xl md:text-2xl font-bold text-${color}-800`}>{sprint.title}</h3>
-              <p className="text-indigo-600 font-semibold text-sm md:text-base">{sprint.theme}</p>
-            </div>
-          </div>
-
-          <h4 className="font-bold text-lg md:text-xl mb-3 text-gray-700">Key Deliverables:</h4>
-          <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
-            {sprint.deliverables.map((item, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
-                <div className="text-xl flex-shrink-0 mt-1">{item.icon}</div>
-                <span
-                  className="text-gray-700 text-sm md:text-base"
-                  dangerouslySetInnerHTML={{ __html: item.desc }}
-                ></span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-// --- MAIN COMPONENT ---
-
-const ArchitectureComparison = () => {
-  // FIX: Set initial page to 'overview' (Quick Summary) as requested
-  const [activeTab, setActiveTab] = useState('overview');
+const renderSingleRoadmap = (roadmap, title, icon, color, themeClasses, isDark) => {
+  const itemBg = isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white hover:bg-gray-50';
+  const itemBorder = isDark ? 'border-gray-600' : 'border-gray-100';
 
   return (
-    // Universal view compatibility is ensured by using fluid widths and responsive padding
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl md:text-4xl font-extrabold text-center mb-6 md:mb-8 text-indigo-900 leading-tight p-2">
-          Wezu Smart Battery System - Strategic Architecture & Roadmap
-        </h1>
+    <div className={`rounded-xl shadow-2xl p-8 ${themeClasses.bgContainer}`}>
+      <h2 className={`text-3xl font-bold mb-6 ${themeClasses.textPrimary} flex items-center gap-2`}>
+        {icon}
+        {title}
+      </h2>
+      <p className={`text-lg mb-8 ${themeClasses.textBody}`}>
+        This is an <strong>8-week MVP roadmap</strong> (four 2-week sprints) focusing on delivering core value quickly with clear, tangible results at each stage.
+      </p>
 
-        {/* Tab Navigation (Responsive scrolling for universal compatibility) */}
-        <div className="flex gap-2 mb-8 overflow-x-auto bg-white rounded-xl p-2 shadow-xl border border-indigo-200">
-          {tabOrder.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              // Adjusted text size and padding for better mobile/universal fit
-              className={`px-3 py-2 text-xs md:px-4 md:py-2 md:text-sm lg:text-base rounded-lg font-semibold transition whitespace-nowrap flex-shrink-0 ${activeTab === tab
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700'
-                }`}
-            >
-              {tabLabels[tab]}
-            </button>
-          ))}
-        </div>
+      <div className="space-y-10">
+        {roadmap.map((sprint, index) => (
+          <div key={index} className={`border-4 border-${color}-200 rounded-xl p-6 bg-${color}-50 relative shadow-xl ${FLOATING_CARD_EFFECT} ${isDark ? 'bg-opacity-10 border-opacity-30' : ''}`}>
 
-        {/* --- TABS --- */}
+            <div className={`absolute -top-4 left-4 ${themeClasses.accentBg} text-white text-sm px-4 py-1 rounded-full font-bold shadow-lg transform rotate-[-1deg] hover:rotate-0 transition duration-300`}>
+              {`SPRINT ${sprint.sprint}: ${sprint.duration}`}
+            </div>
 
-        {/* Overview Tab (Quick Summary) */}
-        {activeTab === 'overview' && (
-          <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900">Quick Summary: Strategy & Savings</h2>
-
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <div className="border-4 border-red-300 rounded-xl p-6 bg-red-50">
-                <h3 className="text-xl md:text-2xl font-bold mb-4 text-red-700 flex items-center gap-2"><X size={24} /> Client Architecture (Azure)</h3>
-                <ul className="space-y-3 text-gray-700">
-                  <li className="flex items-start gap-2">
-                    <X className="text-red-500 mt-1 flex-shrink-0" size={20} />
-                    <span>Vendor Lock-in: Fully dependent on Azure managed services.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <X className="text-red-500 mt-1 flex-shrink-0" size={20} />
-                    <span>High Costs: Premium Azure services for standard tasks.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <X className="text-red-500 mt-1 flex-shrink-0" size={20} />
-                    <span>Over-engineered: CosmosDB and Data Explorer are complex for phase 1 IoT.</span>
-                  </li>
-                </ul>
-                <div className="mt-6 p-4 bg-red-100 rounded-lg">
-                  <p className="font-bold text-xl text-red-800">MVP Cost: ${costBreakdown.client.mvp.total.toLocaleString()}/month</p>
-                </div>
-              </div>
-
-              <div className="border-4 border-green-300 rounded-xl p-6 bg-green-50">
-                <h3 className="text-xl md:text-2xl font-bold mb-4 text-green-700 flex items-center gap-2"><Check size={24} /> Proposed Architecture (Multi-cloud)</h3>
-                <ul className="space-y-3 text-gray-700">
-                  <li className="flex items-start gap-2">
-                    <Check className="text-green-500 mt-1 flex-shrink-0" size={20} />
-                    <span>Cloud Agnostic: Uses Kubernetes and open-source for portability.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="text-green-500 mt-1 flex-shrink-0" size={20} />
-                    <span>Cost Efficiency: 60% reduction using specialized open-source DBs.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="text-green-500 mt-1 flex-shrink-0" size={20} />
-                    <span>Polyglot Persistence: Right database for the right job (Time-Series, Graph, Relational).</span>
-                  </li>
-                </ul>
-                <div className="mt-6 p-4 bg-green-100 rounded-lg">
-                  <p className="font-bold text-xl text-green-800">MVP Cost: ${costBreakdown.proposed.mvp.total.toLocaleString()}/month</p>
-                </div>
+            <div className={`flex items-center gap-4 pt-4 mb-4 border-b-2 border-gray-200 pb-2 ${isDark ? 'border-gray-600' : ''}`}>
+              <div className={`text-5xl flex-shrink-0 text-${color}-600`}>{sprint.icon}</div>
+              <div>
+                <h3 className={`text-2xl font-bold text-${color}-800 ${isDark ? `text-${color}-400` : ''}`}>{sprint.title}</h3>
+                <p className={`${themeClasses.accentColor} font-semibold`}>{sprint.theme}</p>
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-400 to-green-600 text-white rounded-xl p-8 text-center shadow-2xl">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">💰 Projected 2-Year Cost Reduction</h3>
-              <p className="text-4xl md:text-5xl font-bold mb-2">$157,680</p>
-              <p className="text-base md:text-xl">This savings is achieved by optimizing data services and leveraging open-source components, allowing for more investment in feature development.</p>
-            </div>
-          </div>
-        )}
-
-        {/* --- DIAGRAM TAB --- */}
-        {activeTab === 'diagram' && (
-          <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900 flex items-center gap-2">
-              <Layers size={30} />
-              Wezu Smart Battery System - High-Level Architecture
-            </h2>
-
-            {/* Key Principles Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* Clean Architecture Card */}
-              <div className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-indigo-600 transition-all duration-300 hover:scale-[1.02]">
-                <div className="flex items-center space-x-3 mb-3">
-                  <Layers size={24} className="text-indigo-600" />
-                  <h3 className="text-xl font-bold text-gray-900">Clean Architecture Principles</h3>
-                </div>
-                <p className="text-gray-600 text-sm">
-                  The entire system is built on <strong>Clean Architecture</strong> principles for maximum separation of concerns, ensuring the application is highly testable, maintainable, and independent of specific frameworks or databases.
-                </p>
-                <div className="mt-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
-                    High Maintainability
-                  </span>
-                </div>
-              </div>
-              {/* Cloud Agnostic Card */}
-              <div className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-emerald-600 transition-all duration-300 hover:scale-[1.02]">
-                <div className="flex items-center space-x-3 mb-3">
-                  <Cloud size={24} className="text-emerald-600" />
-                  <h3 className="text-xl font-bold text-gray-900">Cloud Agnostic (K8s)</h3>
-                </div>
-                <p className="text-gray-600 text-sm">
-                  We guarantee portability by using <strong>Kubernetes (K8s)</strong> orchestration, avoiding vendor lock-in and allowing seamless deployment across AWS, Azure, or GCP.
-                </p>
-                <div className="mt-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
-                    Vendor Lock-in Avoided
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* The Diagram structure itself, optimized for responsiveness */}
-            <div className="overflow-x-auto w-full">
-              <div className="flex flex-col items-center border-4 border-gray-200 rounded-xl p-4 bg-gray-50 w-full min-w-[300px]">
-
-                {/* 1. TOP LAYER: Client Apps & Monitoring */}
-                <div className="flex flex-col md:flex-row justify-between w-full mb-6 gap-4">
-                  <div className="flex flex-col items-center p-3 md:p-4 bg-red-100 rounded-lg shadow-md border-red-300 border-2 w-full md:w-1/3">
-                    <Code size={24} className="text-red-600 mb-1 md:mb-2" />
-                    <span className="font-bold text-sm md:text-lg text-red-800 text-center">Client Applications</span>
-                    <span className="text-xs text-gray-600 text-center hidden md:block">Customer, Admin, Dealer Portals</span>
-                  </div>
-                  <div className="flex flex-col items-center p-3 md:p-4 bg-yellow-100 rounded-lg shadow-md border-yellow-300 border-2 w-full md:w-1/3">
-                    <Terminal size={24} className="text-yellow-600 mb-1 md:mb-2" />
-                    <span className="font-bold text-sm md:text-lg text-yellow-800 text-center">Monitoring & Alerting</span>
-                    <span className="text-xs text-gray-600 text-center hidden md:block">Prometheus, Grafana, ELK</span>
-                  </div>
-                  <div className="flex flex-col items-center p-3 md:p-4 bg-green-100 rounded-lg shadow-md border-green-300 border-2 w-full md:w-1/3">
-                    <Brain size={24} className="text-green-600 mb-1 md:mb-2" />
-                    <span className="font-bold text-sm md:text-lg text-green-800 text-center">AI/ML Services</span>
-                    <span className="text-xs text-gray-600 text-center hidden md:block">Predictive Maintenance, Fraud</span>
-                  </div>
-                </div>
-
-                {/* Connection Line: Apps/Monitoring to API Gateway (Cloud Layer) */}
-                <div className="w-full flex justify-center mb-6">
-                  <div className="w-1/2 md:w-2/3 flex justify-around">
-                    <ArrowRight size={24} className="text-gray-500 rotate-90" />
-                    <ArrowRight size={24} className="text-gray-500 rotate-90" />
-                    <ArrowRight size={24} className="text-gray-500 rotate-90" />
-                  </div>
-                </div>
-
-                {/* 2. MIDDLE LAYER: Backend and Ingestion (The Cloud Platform) */}
-                <div className="w-full border-4 border-blue-400 rounded-xl p-4 md:p-6 bg-blue-50 relative mb-8">
-                  <span className="absolute -top-4 left-4 bg-blue-400 text-white text-xs md:text-sm px-3 py-1 rounded-full font-bold shadow-lg">
-                    CLOUD PLATFORM (K8s Cluster)
-                  </span>
-
-                  {/* Stacks vertically on mobile, horizontally on medium screens and up */}
-                  <div className="flex flex-col md:flex-row justify-around items-start gap-4">
-
-                    {/* Ingestion Column */}
-                    <div className="flex flex-col items-center w-full md:w-1/4 pb-4 border-b-2 border-blue-200 md:border-b-0 md:border-r-2 md:pr-4">
-                      <MessageSquare size={28} className="text-indigo-600 mb-1 md:mb-2" />
-                      <span className="font-bold text-xs md:text-sm text-indigo-800 text-center">Messaging & Ingestion</span>
-                      <span className="text-xs text-gray-700 text-center">HiveMQ, <strong>Kafka</strong></span>
-                      <ArrowRight size={18} className="text-indigo-600 rotate-90 my-2" />
-                      <div className="p-1 bg-indigo-100 rounded-lg shadow-sm">
-                        <span className="text-xs font-semibold text-indigo-700">Stream Processing</span>
-                      </div>
-                    </div>
-
-                    {/* Microservices Column */}
-                    <div className="flex flex-col items-center w-full md:w-2/4 border-y-2 border-blue-200 md:border-y-0 md:border-l-2 md:border-r-2 px-0 md:px-4 py-4 md:py-0">
-                      <Server size={28} className="text-purple-600 mb-1 md:mb-2" />
-                      <span className="font-bold text-sm md:text-base text-purple-800">Backend Microservices</span>
-                      <span className="text-xs text-gray-700 text-center mb-2">Device Mgmt, Rental, Payments, Inventory</span>
-
-                      {/* API Gateway & Load Balancer */}
-                      <div className="p-1 md:p-2 bg-purple-100 rounded-lg shadow-sm mb-2 w-full text-center">
-                        <span className="text-xs font-semibold text-purple-700">API Gateway / LB</span>
-                      </div>
-
-                      {/* Data/Service Connections */}
-                      <div className="flex justify-center gap-4 w-full mt-2">
-                        <ArrowRight size={18} className="text-purple-600 rotate-90" />
-                        <ArrowRight size={18} className="text-purple-600 rotate-90" />
-                        <ArrowRight size={18} className="text-purple-600 rotate-90" />
-                      </div>
-                    </div>
-
-                    {/* Data Lake Column */}
-                    <div className="flex flex-col items-center w-full md:w-1/4 pt-4 md:pt-0 md:pl-4 md:border-l-2 md:border-blue-200">
-                      <HardDrive size={28} className="text-red-600 mb-1 md:mb-2" />
-                      <span className="font-bold text-xs md:text-sm text-red-800">Long-term Storage</span>
-                      <span className="text-xs text-gray-700 text-center">S3 / R2 (Data Lake)</span>
-                      <ArrowRight size={18} className="text-red-600 rotate-90 my-2" />
-                      <div className="p-1 bg-red-100 rounded-lg shadow-sm">
-                        <span className="text-xs font-semibold text-red-700">Reporting DB</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. BOTTOM LAYER: Data Persistence (Uses responsive grid) */}
-                <div className="flex justify-center w-full mb-6">
-                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 p-4 bg-orange-50 rounded-xl shadow-md border-orange-300 border-2 w-full max-w-4xl gap-4 md:gap-8">
-
-                    <div className="flex flex-col items-center">
-                      <Database size={24} className="text-orange-600 mb-1" />
-                      <span className="font-bold text-sm text-orange-800">PostgreSQL</span>
-                      <span className="text-xs text-gray-600">(Transactions)</span>
-                    </div>
-
-                    <div className="flex flex-col items-center">
-                      <Clock size={24} className="text-orange-600 mb-1" />
-                      <span className="font-bold text-sm text-orange-800">TimescaleDB</span>
-                      <span className="text-xs text-gray-600">(Telemetry)</span>
-                    </div>
-
-                    <div className="flex flex-col items-center">
-                      <Aperture size={24} className="text-orange-600 mb-1" />
-                      <span className="font-bold text-sm text-orange-800">Neo4j</span>
-                      <span className="text-xs text-gray-600">(Relationships)</span>
-                    </div>
-
-                    <div className="flex flex-col items-center">
-                      <Zap size={24} className="text-orange-600 mb-1" />
-                      <span className="font-bold text-sm text-orange-800">Redis</span>
-                      <span className="text-xs text-gray-600">(Cache/State)</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Connection Line: Ingestion to Devices */}
-                <div className="w-1/4 flex justify-center mt-4">
-                  <div className="w-px h-8 bg-gray-500"></div>
-                </div>
-
-                {/* 4. GROUND LAYER: IoT Devices */}
-                <div className="flex justify-center w-full">
-                  <div className="flex items-center p-4 bg-purple-100 rounded-lg shadow-md border-purple-300 border-2 w-full md:w-1/3">
-                    <Cloud size={32} className="text-purple-600 mr-3" />
-                    <span className="font-bold text-lg text-purple-800">IoT Devices & Chargers</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Components Tab (Responsive grid) */}
-        {activeTab === 'components' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900">Component-by-Component Comparison</h2>
-            {Object.entries(componentComparison).map(([key, comp]) => (
-              <div key={key} className="bg-white rounded-xl shadow-xl p-6">
-                <h3 className="text-xl md:text-2xl font-bold mb-4 text-indigo-800">{comp.name}</h3>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="border-2 border-red-300 rounded-lg p-4 bg-red-50">
-                    <h4 className="font-bold text-xl mb-2 text-red-700">Client Choice</h4>
-                    <p className="text-lg font-semibold mb-2">{comp.client.tech}</p>
-                    <p className="text-2xl font-bold text-red-600 mb-3">{comp.client.cost}</p>
-                    <div className="mb-3">
-                      <p className="font-semibold text-green-700 mb-1">Pros:</p>
-                      <ul className="list-disc list-inside space-y-1 text-sm">
-                        {comp.client.pros.map((pro, i) => (
-                          <li key={i}>{pro}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-red-700 mb-1">Cons:</p>
-                      <ul className="list-disc list-inside space-y-1 text-sm">
-                        {comp.client.cons.map((con, i) => (
-                          <li key={i}>{con}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="border-2 border-green-300 rounded-lg p-4 bg-green-50">
-                    <h4 className="font-bold text-xl mb-2 text-green-700">Proposed Alternative</h4>
-                    <p className="text-lg font-semibold mb-2">{comp.proposed.tech}</p>
-                    <p className="text-2xl font-bold text-green-600 mb-3">{comp.proposed.cost}</p>
-                    <div className="mb-3">
-                      <p className="font-semibold text-green-700 mb-1">Pros:</p>
-                      <ul className="list-disc list-inside space-y-1 text-sm">
-                        {comp.proposed.pros.map((pro, i) => (
-                          <li key={i}>{pro}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-red-700 mb-1">Cons:</p>
-                      <ul className="list-disc list-inside space-y-1 text-sm">
-                        {comp.proposed.cons.map((con, i) => (
-                          <li key={i}>{con}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Databases Tab (Responsive grid) */}
-        {activeTab === 'databases' && (
-          <div className="bg-white rounded-xl shadow-xl p-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900">Database Strategy: Polyglot Persistence</h2>
-            <p className="text-base md:text-lg mb-8 text-gray-700">
-              We leverage <strong>specialized databases</strong> for optimal performance and cost efficiency, ensuring we use the right tool for each data type (transactional, time-series, and relational data).
-            </p>
-            <div className="grid md:grid-cols-2 gap-6">
-              {Object.entries(databaseExplanation).map(([key, db]) => (
-                <div key={key} className="border-2 border-indigo-200 rounded-lg p-6 bg-indigo-50">
-                  <div className="flex items-start gap-4">
-                    <Database className="text-indigo-600 flex-shrink-0 mt-1" size={32} />
-                    <div className="flex-1">
-                      <h3 className="text-xl md:text-2xl font-bold mb-2 text-indigo-800">{db.name}</h3>
-                      <div className="mb-3">
-                        <p className="font-semibold text-gray-700 text-base">What it stores:</p>
-                        <p className="text-gray-600 text-sm">{db.useCase}</p>
-                      </div>
-                      <div className="mb-3">
-                        <p className="font-semibold text-gray-700 text-base">Why this database:</p>
-                        <p className="text-gray-600 text-sm">{db.why}</p>
-                      </div>
-                      <div className="bg-green-100 border border-green-300 rounded p-3">
-                        <p className="font-bold text-green-700 text-sm md:text-base">Cost: {db.cost}</p>
-                      </div>
-                    </div>
-                  </div>
+            <h4 className={`font-bold text-xl mb-3 ${themeClasses.textPrimary}`}>Key Deliverables:</h4>
+            <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
+              {sprint.deliverables.map((item, i) => (
+                <div
+                  key={i}
+                  className={`flex items-start gap-3 p-3 rounded-lg shadow-sm border ${itemBorder} ${itemBg} transition duration-200`}
+                >
+                  <div className="text-xl flex-shrink-0 mt-1">{item.icon}</div>
+                  <span
+                    className={`${themeClasses.textBody} text-base`}
+                    dangerouslySetInnerHTML={{ __html: item.desc }}
+                  ></span>
                 </div>
               ))}
             </div>
           </div>
-        )}
+        ))}
+      </div>
+    </div>
+  );
+}
 
-        {/* Architecture Tab */}
-        {activeTab === 'architecture' && (
-          <div className="bg-white rounded-xl shadow-xl p-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-indigo-900">Clean Architecture Explained</h2>
 
-            {architectureTypes.map((arch, idx) => (
-              <div key={idx} className="mb-8">
-                <h3 className="text-xl md:text-2xl font-bold mb-4 text-indigo-800">{arch.title}</h3>
-                <p className="text-base md:text-lg mb-6 text-gray-700">{arch.description}</p>
-                <div className="space-y-4 mb-6">
-                  {arch.layers.map((layer, i) => (
-                    <div key={i} className="border-l-4 border-indigo-500 pl-4 py-3 bg-indigo-50">
-                      <h4 className="font-bold text-lg text-indigo-800">Layer {i + 1}: {layer.name}</h4>
-                      <p className="text-gray-700 text-sm">{layer.desc}</p>
+// --- MAIN COMPONENT ---
+
+const ArchitectureComparison = () => {
+  // SET INITIAL TAB TO 'overview' AS REQUESTED
+  const [activeTab, setActiveTab] = useState('overview');
+  const [theme, setTheme] = useState('dark');
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // New state for menu
+
+  const isDark = theme === 'dark';
+
+  const toggleTheme = () => {
+    setTheme(isDark ? 'light' : 'dark');
+  };
+
+  const themeClasses = useMemo(() => getThemeStyles(isDark), [isDark]);
+
+  // Calculations for Overview Savings Banner (now 1-Year Projection in USD)
+  const clientAnnualScaleUSD = costBreakdown.client.scale.total * 12;
+  const proposedAnnualScaleUSD = costBreakdown.proposed.scale.total * 12;
+  const projected1YearSavingsUSD = clientAnnualScaleUSD - proposedAnnualScaleUSD; // Savings for 1 year at scale phase rate (in USD)
+
+
+  return (
+    <div className={`min-h-screen ${themeClasses.bgPrimary} p-4 md:p-8 ${isDark ? 'dark' : ''}`}>
+      <style>
+        {`
+        /* Global Fade-in and Bounce/Pulse animations for a modern feel */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation-duration: 0.5s;
+            animation-timing-function: ease-out;
+            animation-fill-mode: forwards;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+            50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+        }
+        .animate-bounce {
+            animation: bounce 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        /* Custom 3D-like shadow for the glass container to enhance the 'floating' effect */
+        .shadow-3xl {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        .dark .shadow-3xl {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+        `}
+      </style>
+
+      {/* NEW: Advanced Tech Menu */}
+      <AdvancedTechMenu
+        isMenuOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        tabOrder={tabOrder}
+        tabLabels={tabLabels}
+        themeClasses={themeClasses}
+      />
+
+      <div className="max-w-7xl mx-auto pt-6">
+
+        {/* HIGHLY ADVANCED: The Glassmorphism Container */}
+        <div className={`rounded-3xl shadow-3xl p-4 md:p-8 border ${themeClasses.bgGlass} transition duration-500 ease-in-out`}>
+
+          {/* Header and Theme Toggle & Menu Button */}
+          <div className="flex justify-between items-center mb-6 md:mb-8 sticky top-0 z-30 p-2 -m-2 bg-transparent backdrop-blur-sm rounded-lg">
+            <h1 className={`text-3xl md:text-4xl font-extrabold ${themeClasses.textPrimary} leading-tight`}>
+              Wezu Smart Battery System - <span className={themeClasses.accentColor.replace('text', 'text-4xl')}>Architecture & Roadmap</span>
+            </h1>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleTheme}
+                className={`flex items-center gap-2 p-3 rounded-full transition duration-300 transform hover:scale-110 ${isDark ? 'bg-pink-500 text-white shadow-lg' : 'bg-gray-200 text-pink-600 shadow-xl'}`}
+                title="Toggle Theme"
+              >
+                {isDark ? <Sun size={24} /> : <Moon size={24} />}
+                <span className="hidden md:inline font-semibold">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+
+              {/* New Menu Button */}
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className={`p-3 rounded-full transition duration-300 transform hover:scale-110 ${themeClasses.accentBg} text-white shadow-lg`}
+                title="Open Navigation Menu"
+              >
+                <Menu size={24} />
+              </button>
+            </div>
+          </div>
+
+          {/* --- TABS --- */}
+          <ContentTransitionWrapper activeTab={activeTab}>
+
+            {/* Overview Tab */}
+            {activeTab === 'overview' && (
+              <div className={`rounded-xl shadow-xl p-6 md:p-8 ${themeClasses.bgContainer}`}>
+                <h2 className={`text-3xl font-bold mb-6 ${themeClasses.textPrimary}`}>Quick Summary: Strategy & Savings</h2>
+
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                  {/* Client Card */}
+                  <div className={`border-4 border-rose-300 rounded-xl p-6 ${themeClasses.badBg.split(' ')[0]} transform ${FLOATING_CARD_EFFECT}`}>
+                    <h3 className={`text-2xl font-bold mb-4 ${themeClasses.badText} flex items-center gap-2`}>
+                      <X size={24} className={`animate-pulse ${themeClasses.badText.replace('text', 'text-4xl')}`} /> Client Architecture (Azure)
+                    </h3>
+                    <ul className="space-y-3 text-gray-700">
+                      <li className="flex items-start gap-2">
+                        <X className={`${themeClasses.badText.replace('text', 'text-2xl')} mt-1 flex-shrink-0`} size={20} />
+                        <span className={themeClasses.textBody}>Vendor Lock-in: Fully dependent on Azure managed services.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <X className={`${themeClasses.badText.replace('text', 'text-2xl')} mt-1 flex-shrink-0`} size={20} />
+                        <span className={themeClasses.textBody}>High Costs: Premium Azure services for standard tasks.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <X className={`${themeClasses.badText.replace('text', 'text-2xl')} mt-1 flex-shrink-0`} size={20} />
+                        <span className={themeClasses.textBody}>Over-engineered: CosmosDB and Data Explorer are complex for phase 1 IoT.</span>
+                      </li>
+                    </ul>
+                    <div className={`mt-6 p-4 ${themeClasses.badBg} rounded-lg border-2 ${themeClasses.badBorder}`}>
+                      {/* Cost in USD */}
+                      <p className={`font-bold text-xl ${themeClasses.badText}`}>MVP Cost: ${costBreakdown.client.mvp.total}/month (Annually: ${costBreakdown.client.mvp.total * 12})</p>
+                    </div>
+                  </div>
+
+                  {/* Proposed Card */}
+                  <div className={`border-4 border-teal-300 rounded-xl p-6 ${themeClasses.goodBg.split(' ')[0]} transform ${FLOATING_CARD_EFFECT}`}>
+                    <h3 className={`text-2xl font-bold mb-4 ${themeClasses.goodText} flex items-center gap-2`}>
+                      <Check size={24} className={`animate-pulse ${themeClasses.goodText.replace('text', 'text-4xl')}`} /> Proposed Architecture (Multi-cloud)
+                    </h3>
+                    <ul className="space-y-3 text-gray-700">
+                      <li className="flex items-start gap-2">
+                        <Check className={`${themeClasses.goodText.replace('text', 'text-2xl')} mt-1 flex-shrink-0`} size={20} />
+                        <span className={themeClasses.textBody}>Cloud Agnostic: Uses Kubernetes and open-source for portability.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className={`${themeClasses.goodText.replace('text', 'text-2xl')} mt-1 flex-shrink-0`} size={20} />
+                        <span className={themeClasses.textBody}>Cost Efficiency: Significant reduction using specialized open-source DBs.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className={`${themeClasses.goodText.replace('text', 'text-2xl')} mt-1 flex-shrink-0`} size={20} />
+                        <span className={themeClasses.textBody}>Polyglot Persistence: Right database for the right job (Time-Series, Graph, Relational).</span>
+                      </li>
+                    </ul>
+                    <div className={`mt-6 p-4 ${themeClasses.goodBg} rounded-lg border-2 ${themeClasses.goodBorder}`}>
+                      {/* Cost in USD */}
+                      <p className={`font-bold text-xl ${themeClasses.goodText}`}>MVP Cost: ${costBreakdown.proposed.mvp.total}/month (Annually: ${costBreakdown.proposed.mvp.total * 12})</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Savings Banner - UPDATED FOR 1-YEAR PROJECTION IN USD */}
+                <div className={`${themeClasses.savingsBanner} rounded-xl p-8 text-center shadow-2xl border-4 border-white transform hover:scale-[1.01] transition duration-300`}>
+                  <h3 className="text-3xl font-bold mb-4 flex items-center justify-center gap-2">
+                    <TrendingDown size={30} /> Projected 1-Year Cost Reduction (Based on Scale Phase Potential)
+                  </h3>
+                  <p className="text-6xl font-extrabold mb-2 animate-bounce-slow">
+                    {formatUSD(projected1YearSavingsUSD)}
+                  </p>
+                  <p className="text-xl">
+                    This significant savings is achieved by optimizing data services and leveraging open-source components.
+                    At full **Scale**, the proposed architecture saves **{formatUSD(projected1YearSavingsUSD)}** annually.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* --- DIAGRAM TAB --- (No changes required here, currency is not involved) */}
+            {activeTab === 'diagram' && (
+              <div className={`rounded-xl shadow-xl p-6 md:p-8 ${themeClasses.bgContainer}`}>
+                <h2 className={`text-3xl font-bold mb-6 ${themeClasses.textPrimary} flex items-center gap-2`}>
+                  <Layers size={30} className={themeClasses.accentColor.replace('text', '')} />
+                  Wezu Smart Battery System - High-Level Architecture
+                </h2>
+
+                {/* Key Principles Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  {/* Clean Architecture Card */}
+                  <div className={`p-6 rounded-xl shadow-lg border-t-4 border-pink-600 transition-all duration-300 ${FLOATING_CARD_EFFECT} ${themeClasses.bgContainer}`}>
+                    <div className="flex items-center space-x-3 mb-3">
+                      <Layers size={24} className="text-pink-600" />
+                      <h3 className={`text-xl font-bold ${themeClasses.textPrimary}`}>Clean Architecture Principles</h3>
+                    </div>
+                    <p className={themeClasses.textBody}>
+                      The entire system is built on **Clean Architecture** principles for maximum separation of concerns, ensuring the application is highly testable, maintainable, and independent of specific frameworks or databases.
+                    </p>
+                    <div className="mt-4">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-pink-100 ${themeClasses.accentColor}`}>
+                        High Maintainability
+                      </span>
+                    </div>
+                  </div>
+                  {/* Cloud Agnostic Card */}
+                  <div className={`p-6 rounded-xl shadow-lg border-t-4 border-teal-600 transition-all duration-300 ${FLOATING_CARD_EFFECT} ${themeClasses.bgContainer}`}>
+                    <div className="flex items-center space-x-3 mb-3">
+                      <Cloud size={24} className="text-teal-600" />
+                      <h3 className={`text-xl font-bold ${themeClasses.textPrimary}`}>Cloud Agnostic (K8s)</h3>
+                    </div>
+                    <p className={themeClasses.textBody}>
+                      We guarantee portability by using **Kubernetes (K8s)** orchestration, avoiding vendor lock-in and allowing seamless deployment across AWS, Azure, or GCP.
+                    </p>
+                    <div className="mt-4">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-100 ${themeClasses.goodText}`}>
+                        Vendor Lock-in Avoided
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* --- ARCHITECTURE DIAGRAM CONTAINER (Simplified Theming) --- */}
+                <div className={`flex flex-col items-center border-4 border-gray-300 rounded-xl p-4 relative shadow-inner ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-50'}`}>
+
+                  {/* 1. TOP LAYER: Client Apps & Monitoring */}
+                  <div className="flex justify-between w-full mb-6 gap-2 md:gap-4">
+                    <div className="flex flex-col items-center p-3 md:p-4 bg-rose-100 rounded-lg shadow-md border-rose-300 border-2 w-1/3 transform hover:scale-[1.05] transition duration-200">
+                      <Code size={24} className="text-rose-600 mb-1 md:mb-2" />
+                      <span className="font-bold text-sm md:text-lg text-rose-800 text-center">Client Applications</span>
+                      <span className="text-xs text-gray-600 text-center hidden md:block">Customer, Admin, Dealer Portals</span>
+                    </div>
+                    <div className="flex flex-col items-center p-3 md:p-4 bg-yellow-100 rounded-lg shadow-md border-yellow-300 border-2 w-1/3 transform hover:scale-[1.05] transition duration-200">
+                      <Terminal size={24} className="text-yellow-600 mb-1 md:mb-2" />
+                      <span className="font-bold text-sm md:text-lg text-yellow-800 text-center">Monitoring & Alerting</span>
+                      <span className="text-xs text-gray-600 text-center hidden md:block">Prometheus, Grafana, ELK</span>
+                    </div>
+                    <div className="flex flex-col items-center p-3 md:p-4 bg-teal-100 rounded-lg shadow-md border-teal-300 border-2 w-1/3 transform hover:scale-[1.05] transition duration-200">
+                      <Brain size={24} className="text-teal-600 mb-1 md:mb-2" />
+                      <span className="font-bold text-sm md:text-lg text-teal-800 text-center">AI/ML Services</span>
+                      <span className="text-xs text-gray-600 text-center hidden md:block">Predictive Maintenance, Fraud</span>
+                    </div>
+                  </div>
+
+                  {/* Connection Line: Apps/Monitoring to API Gateway (Cloud Layer) */}
+                  <div className="w-full flex justify-center mb-6">
+                    <div className="w-1/2 md:w-2/3 flex justify-around">
+                      <ArrowRight size={24} className="text-gray-500 rotate-90 animate-bounce" style={{ '--animation-delay': '0s' }} />
+                      <ArrowRight size={24} className="text-gray-500 rotate-90 animate-bounce" style={{ '--animation-delay': '0.1s' }} />
+                      <ArrowRight size={24} className="text-gray-500 rotate-90 animate-bounce" style={{ '--animation-delay': '0.2s' }} />
+                    </div>
+                  </div>
+
+                  {/* 2. MIDDLE LAYER: Backend and Ingestion (The Cloud Platform) */}
+                  <div className={`w-full border-4 border-sky-400 rounded-xl p-4 md:p-6 relative mb-8 shadow-xl transform hover:shadow-2xl transition duration-300 ${isDark ? 'bg-sky-900 bg-opacity-30 border-sky-600' : 'bg-sky-50'}`}>
+                    <span className="absolute -top-4 left-4 bg-sky-400 text-white text-xs md:text-sm px-3 py-1 rounded-full font-bold shadow-lg">
+                      CLOUD PLATFORM (K8s Cluster)
+                    </span>
+
+                    <div className="flex justify-around items-start gap-2 md:gap-4">
+
+                      {/* Ingestion Column */}
+                      <div className="flex flex-col items-center w-1/4">
+                        <MessageSquare size={28} className="text-pink-600 mb-1 md:mb-2" />
+                        <span className={`font-bold text-xs md:text-sm ${themeClasses.textPrimary} text-center`}>Messaging & Ingestion</span>
+                        <span className={`text-xs ${themeClasses.textBody} text-center`}>HiveMQ, <strong>Kafka</strong></span>
+                        <ArrowRight size={18} className="text-pink-600 rotate-90 my-2" />
+                        <div className="p-1 bg-pink-100 rounded-lg shadow-sm transform hover:scale-[1.1] transition duration-200">
+                          <span className={`text-xs font-semibold text-pink-700 ${isDark ? 'text-pink-400' : ''}`}>Stream Processing</span>
+                        </div>
+                      </div>
+
+                      {/* Microservices Column */}
+                      <div className="flex flex-col items-center w-2/4 border-l-2 border-r-2 border-sky-200 px-2 md:px-4">
+                        <Server size={28} className="text-purple-600 mb-1 md:mb-2" />
+                        <span className={`font-bold text-sm md:text-base ${themeClasses.textPrimary}`}>Backend Microservices</span>
+                        <span className={`text-xs ${themeClasses.textBody} text-center mb-2`}>Device Mgmt, Rental, Payments, Inventory</span>
+
+                        {/* API Gateway & Load Balancer */}
+                        <div className="p-1 md:p-2 bg-purple-100 rounded-lg shadow-md mb-2 w-full text-center transform hover:bg-purple-200 transition duration-200">
+                          <span className={`text-xs font-semibold text-purple-700 ${isDark ? 'text-purple-400' : ''}`}>API Gateway / LB</span>
+                        </div>
+
+                        {/* Data/Service Connections */}
+                        <div className="flex justify-center gap-4 w-full mt-2">
+                          <ArrowRight size={18} className="text-purple-600 rotate-90" />
+                          <ArrowRight size={18} className="text-purple-600 rotate-90" />
+                          <ArrowRight size={18} className="text-purple-600 rotate-90" />
+                        </div>
+                      </div>
+
+                      {/* Data Lake Column */}
+                      <div className="flex flex-col items-center w-1/4">
+                        <HardDrive size={28} className="text-teal-600 mb-1 md:mb-2" />
+                        <span className={`font-bold text-xs md:text-sm ${themeClasses.textPrimary}`}>Long-term Storage</span>
+                        <span className={`text-xs ${themeClasses.textBody} text-center`}>S3 / R2 (Data Lake)</span>
+                        <ArrowRight size={18} className="text-teal-600 rotate-90 my-2" />
+                        <div className="p-1 bg-teal-100 rounded-lg shadow-sm transform hover:scale-[1.1] transition duration-200">
+                          <span className={`text-xs font-semibold text-teal-700 ${isDark ? 'text-teal-400' : ''}`}>Reporting DB</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. BOTTOM LAYER: Data Persistence */}
+                  <div className="flex justify-center w-full mb-6">
+                    <div className={`grid grid-cols-2 md:flex md:justify-around p-4 rounded-xl shadow-md border-orange-300 border-2 w-full max-w-4xl gap-4 md:gap-8 transform hover:shadow-lg transition duration-300 ${isDark ? 'bg-orange-900 bg-opacity-30 border-orange-700' : 'bg-orange-50'}`}>
+
+                      <div className={`flex flex-col items-center p-2 rounded-lg ${isDark ? 'hover:bg-orange-700' : 'hover:bg-orange-100'} transition duration-200`}>
+                        <Database size={24} className="text-orange-600 mb-1" />
+                        <span className={`font-bold text-sm text-orange-800 ${isDark ? 'text-orange-300' : ''}`}>PostgreSQL</span>
+                        <span className={`text-xs ${themeClasses.textBody}`}>(Transactions)</span>
+                      </div>
+
+                      <div className={`flex flex-col items-center p-2 rounded-lg ${isDark ? 'hover:bg-orange-700' : 'hover:bg-orange-100'} transition duration-200`}>
+                        <Clock size={24} className="text-orange-600 mb-1" />
+                        <span className={`font-bold text-sm text-orange-800 ${isDark ? 'text-orange-300' : ''}`}>TimescaleDB</span>
+                        <span className={`text-xs ${themeClasses.textBody}`}>(Telemetry)</span>
+                      </div>
+
+                      <div className={`flex flex-col items-center p-2 rounded-lg ${isDark ? 'hover:bg-orange-700' : 'hover:bg-orange-100'} transition duration-200`}>
+                        <Aperture size={24} className="text-orange-600 mb-1" />
+                        <span className={`font-bold text-sm text-orange-800 ${isDark ? 'text-orange-300' : ''}`}>Neo4j</span>
+                        <span className={`text-xs ${themeClasses.textBody}`}>(Relationships)</span>
+                      </div>
+
+                      <div className={`flex flex-col items-center p-2 rounded-lg ${isDark ? 'hover:bg-orange-700' : 'hover:bg-orange-100'} transition duration-200`}>
+                        <Zap size={24} className="text-orange-600 mb-1" />
+                        <span className={`font-bold text-sm text-orange-800 ${isDark ? 'text-orange-300' : ''}`}>Redis</span>
+                        <span className={`text-xs ${themeClasses.textBody}`}>(Cache/State)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Connection Line: Ingestion to Devices */}
+                  <div className="w-1/4 flex justify-center mt-4">
+                    <div className="w-px h-8 bg-gray-500"></div>
+                  </div>
+
+                  {/* 4. GROUND LAYER: IoT Devices */}
+                  <div className="flex justify-center w-full">
+                    <div className="flex items-center p-4 bg-purple-100 rounded-lg shadow-md border-purple-300 border-2 w-2/3 md:w-1/3 animate-pulse">
+                      <Cloud size={32} className="text-purple-600 mr-3" />
+                      <span className="font-bold text-lg text-purple-800">IoT Devices & Chargers</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Cost Tab - USD COSTS WITH INR PROJECTION */}
+            {activeTab === 'cost' && (
+              <div className={`rounded-xl shadow-xl p-8 ${themeClasses.bgContainer}`}>
+                <h2 className={`text-3xl font-bold mb-8 ${themeClasses.textPrimary} flex items-center gap-2`}>
+                  <IndianRupee size={30} className='text-green-600 animate-pulse' /> Detailed Cost Breakdown & Annual Projection
+                </h2>
+                <p className={`text-lg mb-8 ${themeClasses.textBody}`}>
+                  Monthly costs are displayed in **USD ($)**, while the projected annual savings are converted to **Indian Rupees (₹)** for local context and impact.
+                </p>
+
+                <CostComparisonChart
+                  phase="MVP (0-6 months, 100-500 devices)"
+                  clientCost={costBreakdown.client.mvp.total}
+                  proposedCost={costBreakdown.proposed.mvp.total}
+                  themeClasses={themeClasses}
+                  isDark={isDark}
+                />
+                <CostComparisonChart
+                  phase="Growth (6-18 months, 500-5,000 devices)"
+                  clientCost={costBreakdown.client.growth.total}
+                  proposedCost={costBreakdown.proposed.growth.total}
+                  themeClasses={themeClasses}
+                  isDark={isDark}
+                />
+                <CostComparisonChart
+                  phase="Scale (18+ months, 5,000-50,000 devices)"
+                  clientCost={costBreakdown.client.scale.total}
+                  proposedCost={costBreakdown.proposed.scale.total}
+                  themeClasses={themeClasses}
+                  isDark={isDark}
+                />
+
+                {/* Final Annual Projection Summary - USD COSTS, INR SAVINGS */}
+                <div className={`mt-12 p-8 rounded-xl shadow-2xl border-4 border-teal-500 bg-teal-50 transform hover:scale-[1.01] transition duration-300 ${isDark ? 'bg-teal-900 bg-opacity-30 border-teal-700' : ''}`}>
+                  <h3 className={`text-3xl font-extrabold mb-6 ${themeClasses.goodText} flex items-center gap-2`}>
+                    <BarChart size={30} /> Final Annual Cost Projection Summary
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full border-collapse">
+                      <thead>
+                        <tr className={`${themeClasses.accentBg.split(' ')[0]} text-white`}>
+                          <th className="border p-3 text-left">Growth Phase</th>
+                          <th className="border p-3 text-right">Client Annual Cost (Azure - $)</th>
+                          <th className="border p-3 text-right">Proposed Annual Cost (Multi-cloud - $)</th>
+                          <th className="border p-3 text-right">Annual Savings (INR Projection)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {/* Row 1: MVP */}
+                        <tr className={`hover:${isDark ? 'bg-gray-700' : 'bg-pink-50'} transition duration-150`}>
+                          <td className={`border p-3 font-bold ${themeClasses.textPrimary}`}>MVP (Year 1)</td>
+                          <td className={`border p-3 text-right font-semibold ${themeClasses.badText}`}>
+                            {formatUSD(costBreakdown.client.mvp.total * 12)}
+                          </td>
+                          <td className={`border p-3 text-right font-semibold ${themeClasses.goodText}`}>
+                            {formatUSD(costBreakdown.proposed.mvp.total * 12)}
+                          </td>
+                          <td className={`border p-3 text-right font-bold text-teal-600 ${isDark ? 'text-teal-400' : ''}`}>
+                            {/* Annual Savings in INR */}
+                            {formatINRProjection((convertToINR(costBreakdown.client.mvp.total) - convertToINR(costBreakdown.proposed.mvp.total)) * 12)}
+                          </td>
+                        </tr>
+                        {/* Row 2: Growth */}
+                        <tr className={`hover:${isDark ? 'bg-gray-700' : 'bg-pink-50'} transition duration-150`}>
+                          <td className={`border p-3 font-bold ${themeClasses.textPrimary}`}>Growth (Year 2)</td>
+                          <td className={`border p-3 text-right font-semibold ${themeClasses.badText}`}>
+                            {formatUSD(costBreakdown.client.growth.total * 12)}
+                          </td>
+                          <td className={`border p-3 text-right font-semibold ${themeClasses.goodText}`}>
+                            {formatUSD(costBreakdown.proposed.growth.total * 12)}
+                          </td>
+                          <td className={`border p-3 text-right font-bold text-teal-600 ${isDark ? 'text-teal-400' : ''}`}>
+                            {/* Annual Savings in INR */}
+                            {formatINRProjection((convertToINR(costBreakdown.client.growth.total) - convertToINR(costBreakdown.proposed.growth.total)) * 12)}
+                          </td>
+                        </tr>
+                        {/* Row 3: Scale */}
+                        <tr className={`hover:${isDark ? 'bg-gray-700' : 'bg-pink-50'} transition duration-150`}>
+                          <td className={`border p-3 font-bold ${themeClasses.textPrimary}`}>Scale (Year 3+)</td>
+                          <td className={`border p-3 text-right font-semibold ${themeClasses.badText}`}>
+                            {formatUSD(costBreakdown.client.scale.total * 12)}
+                          </td>
+                          <td className={`border p-3 text-right font-semibold ${themeClasses.goodText}`}>
+                            {formatUSD(costBreakdown.proposed.scale.total * 12)}
+                          </td>
+                          <td className={`border p-3 text-right font-bold text-teal-600 ${isDark ? 'text-teal-400' : ''}`}>
+                            {/* Annual Savings in INR */}
+                            {formatINRProjection((convertToINR(costBreakdown.client.scale.total) - convertToINR(costBreakdown.proposed.scale.total)) * 12)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Detailed breakdown table (Monthly - USD) */}
+                <div className="mt-8">
+                  <h3 className={`text-2xl font-bold mb-4 ${themeClasses.textSecondary}`}>Component-wise Cost Breakdown (Growth Phase - Monthly USD)</h3>
+                  <div className={`overflow-x-auto border-4 ${themeClasses.borderSecondary} rounded-lg shadow-lg`}>
+                    <table className="min-w-full border-collapse">
+                      <thead>
+                        <tr className={`${themeClasses.accentBg.split(' ')[0]} text-white sticky top-0`}>
+                          <th className="border p-3 text-left">Component</th>
+                          <th className="border p-3 text-right">Client (Azure - $)</th>
+                          <th className="border p-3 text-right">Proposed ($)</th>
+                          <th className="border p-3 text-right">Savings ($)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.keys(costBreakdown.client.growth).filter(k => k !== 'total').map(component => (
+                          <tr key={component} className={`hover:${isDark ? 'bg-gray-700' : 'bg-pink-50'} transition duration-150`}>
+                            <td className={`border p-3 capitalize font-semibold ${themeClasses.textBody}`}>{component}</td>
+                            <td className={`border p-3 text-right ${themeClasses.badText} font-semibold`}>
+                              {formatUSD(costBreakdown.client.growth[component])}
+                            </td>
+                            <td className={`border p-3 text-right ${themeClasses.goodText} font-semibold`}>
+                              {formatUSD(costBreakdown.proposed.growth[component])}
+                            </td>
+                            <td className={`border p-3 text-right font-bold ${themeClasses.goodText}`}>
+                              {formatUSD(costBreakdown.client.growth[component] - costBreakdown.proposed.growth[component])}
+                            </td>
+                          </tr>
+                        ))}
+                        <tr className={`font-extrabold text-lg border-t-4 ${themeClasses.accentBorder} ${isDark ? 'bg-gray-700' : 'bg-pink-100'}`}>
+                          <td className={`border p-3 ${themeClasses.textPrimary}`}>TOTAL MONTHLY</td>
+                          <td className={`border p-3 text-right ${themeClasses.badText}`}>
+                            {formatUSD(costBreakdown.client.growth.total)}
+                          </td>
+                          <td className={`border p-3 text-right ${themeClasses.goodText}`}>
+                            {formatUSD(costBreakdown.proposed.growth.total)}
+                          </td>
+                          <td className={`border p-3 text-right ${themeClasses.goodText} text-xl`}>
+                            {formatUSD(costBreakdown.client.growth.total - costBreakdown.proposed.growth.total)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Components Tab */}
+            {activeTab === 'components' && (
+              <div className="space-y-6">
+                <h2 className={`text-3xl font-bold mb-6 ${themeClasses.textPrimary}`}>Component-by-Component Comparison</h2>
+                {Object.entries(componentComparison).map(([key, comp]) => (
+                  <div key={key} className={`rounded-xl shadow-xl p-6 ${themeClasses.bgContainer} ${FLOATING_CARD_EFFECT}`}>
+                    <h3 className={`text-2xl font-bold mb-4 ${themeClasses.textSecondary} border-b pb-2`}>{comp.name}</h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {/* Client Card */}
+                      <div className={`border-2 border-rose-300 rounded-lg p-4 ${themeClasses.badBg.split(' ')[0]} hover:bg-rose-100 transition duration-200`}>
+                        <h4 className={`font-bold text-xl mb-2 ${themeClasses.badText}`}>Client Choice</h4>
+                        <p className="text-lg font-semibold mb-2">{comp.client.tech}</p>
+                        <p className={`text-2xl font-bold ${themeClasses.badText} mb-3`}>{comp.client.cost}</p>
+                        <div className="mb-3">
+                          <p className={`font-semibold ${themeClasses.goodText} mb-1`}>Pros:</p>
+                          <ul className={`list-disc list-inside space-y-1 ${themeClasses.textBody}`}>
+                            {comp.client.pros.map((pro, i) => (
+                              <li key={i} className="text-sm">{pro}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <p className={`font-semibold ${themeClasses.badText} mb-1`}>Cons:</p>
+                          <ul className={`list-disc list-inside space-y-1 ${themeClasses.textBody}`}>
+                            {comp.client.cons.map((con, i) => (
+                              <li key={i} className="text-sm">{con}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      {/* Proposed Card */}
+                      <div className={`border-2 border-teal-300 rounded-lg p-4 ${themeClasses.goodBg.split(' ')[0]} hover:bg-teal-100 transition duration-200`}>
+                        <h4 className={`font-bold text-xl mb-2 ${themeClasses.goodText}`}>Proposed Alternative</h4>
+                        <p className="text-lg font-semibold mb-2">{comp.proposed.tech}</p>
+                        <p className={`text-2xl font-bold ${themeClasses.goodText} mb-3`}>{comp.proposed.cost}</p>
+                        <div className="mb-3">
+                          <p className={`font-semibold ${themeClasses.goodText} mb-1`}>Pros:</p>
+                          <ul className={`list-disc list-inside space-y-1 ${themeClasses.textBody}`}>
+                            {comp.proposed.pros.map((pro, i) => (
+                              <li key={i} className="text-sm">{pro}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <p className={`font-semibold ${themeClasses.badText} mb-1`}>Cons:</p>
+                          <ul className={`list-disc list-inside space-y-1 ${themeClasses.textBody}`}>
+                            {comp.proposed.cons.map((con, i) => (
+                              <li key={i} className="text-sm">{con}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Databases Tab */}
+            {activeTab === 'databases' && (
+              <div className={`rounded-xl shadow-xl p-8 ${themeClasses.bgContainer}`}>
+                <h2 className={`text-3xl font-bold mb-6 ${themeClasses.textPrimary}`}>Database Strategy: Polyglot Persistence</h2>
+                <p className={`text-lg mb-8 ${themeClasses.textBody}`}>
+                  We leverage **specialized databases** for optimal performance and cost efficiency, ensuring we use the right tool for each data type (transactional, time-series, and relational data).
+                </p>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {Object.entries(databaseExplanation).map(([key, db]) => (
+                    <div key={key} className={`border-2 ${themeClasses.borderSecondary} rounded-lg p-6 bg-pink-50 transform ${FLOATING_CARD_EFFECT} ${isDark ? 'bg-opacity-10' : ''}`}>
+                      <div className="flex items-start gap-4">
+                        <Database className={themeClasses.accentColor.replace('text', '') + ' flex-shrink-0 mt-1'} size={32} />
+                        <div className="flex-1">
+                          <h3 className={`text-2xl font-bold mb-2 ${themeClasses.textSecondary}`}>{db.name}</h3>
+                          <div className="mb-3">
+                            <p className={`font-semibold ${themeClasses.textPrimary}`}>What it stores:</p>
+                            <p className={`text-sm ${themeClasses.textBody}`}>{db.useCase}</p>
+                          </div>
+                          <div className="mb-3">
+                            <p className={`font-semibold ${themeClasses.textPrimary}`}>Why this database:</p>
+                            <p className={`text-sm ${themeClasses.textBody}`}>{db.why}</p>
+                          </div>
+                          <div className={`bg-teal-100 border border-teal-300 rounded p-3 transform hover:scale-[1.01] transition duration-200 ${isDark ? 'bg-teal-900 border-teal-700' : ''}`}>
+                            <p className={`font-bold text-teal-700 ${isDark ? 'text-teal-400' : ''}`}>Cost: {db.cost}</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
-                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6">
-                  <h4 className="font-bold text-xl mb-4 text-green-800">Key Benefits:</h4>
-                  <ul className="space-y-3">
-                    {arch.benefits.map((benefit, i) => (
-                      <li key={i} className="flex gap-2 text-sm md:text-base">
-                        <Check className="text-green-500 flex-shrink-0 mt-1" size={20} />
-                        <span className="text-gray-700">{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        {/* Cost Tab (Responsive tables with overflow-x-auto) */}
-        {activeTab === 'cost' && (
-          <div className="bg-white rounded-xl shadow-xl p-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8 text-indigo-900">Detailed Cost Comparison</h2>
+            {/* Architecture Tab */}
+            {activeTab === 'architecture' && (
+              <div className={`rounded-xl shadow-xl p-8 ${themeClasses.bgContainer}`}>
+                <h2 className={`text-3xl font-bold mb-6 ${themeClasses.textPrimary}`}>Clean Architecture Explained</h2>
 
-            <CostComparisonChart
-              phase="MVP (0-6 months, 100-500 devices)"
-              clientCost={costBreakdown.client.mvp.total}
-              proposedCost={costBreakdown.proposed.mvp.total}
-            />
-            <CostComparisonChart
-              phase="Growth (6-18 months, 500-5,000 devices)"
-              clientCost={costBreakdown.client.growth.total}
-              proposedCost={costBreakdown.proposed.growth.total}
-            />
-            <CostComparisonChart
-              phase="Scale (18+ months, 5,000-50,000 devices)"
-              clientCost={costBreakdown.client.scale.total}
-              proposedCost={costBreakdown.proposed.scale.total}
-            />
-
-            {/* Detailed breakdown table */}
-            <div className="mt-8">
-              <h3 className="text-2xl font-bold mb-4 text-indigo-800">Component-wise Cost Breakdown (Growth Phase)</h3>
-              {/* Universal Fix: Ensure tables do not cause overflow by allowing horizontal scrolling */}
-              <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse">
-                  <thead>
-                    <tr className="bg-indigo-600 text-white text-sm md:text-base">
-                      <th className="border p-3 text-left">Component</th>
-                      <th className="border p-3 text-right">Client (Azure)</th>
-                      <th className="border p-3 text-right">Proposed</th>
-                      <th className="border p-3 text-right">Savings</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-sm md:text-base">
-                    {Object.keys(costBreakdown.client.growth).filter(k => k !== 'total').map(component => (
-                      <tr key={component} className="hover:bg-gray-50">
-                        <td className="border p-3 capitalize font-semibold">{component}</td>
-                        <td className="border p-3 text-right text-red-600 font-semibold">
-                          ${costBreakdown.client.growth[component]}
-                        </td>
-                        <td className="border p-3 text-right text-green-600 font-semibold">
-                          ${costBreakdown.proposed.growth[component]}
-                        </td>
-                        <td className="border p-3 text-right font-bold text-green-700">
-                          ${costBreakdown.client.growth[component] - costBreakdown.proposed.growth[component]}
-                        </td>
-                      </tr>
-                    ))}
-                    <tr className="bg-gray-100 font-bold text-base md:text-lg">
-                      <td className="border p-3">TOTAL</td>
-                      <td className="border p-3 text-right text-red-700">
-                        ${costBreakdown.client.growth.total}
-                      </td>
-                      <td className="border p-3 text-right text-green-700">
-                        ${costBreakdown.proposed.growth.total}
-                      </td>
-                      <td className="border p-3 text-right text-green-700 text-lg md:text-xl">
-                        ${costBreakdown.client.growth.total - costBreakdown.proposed.growth.total}/mo
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                {architectureTypes.map((arch, idx) => (
+                  <div key={idx} className="mb-8">
+                    <h3 className={`text-2xl font-bold mb-4 ${themeClasses.textSecondary}`}>{arch.title}</h3>
+                    <p className={`text-lg mb-6 ${themeClasses.textBody}`}>{arch.description}</p>
+                    <div className="space-y-4 mb-6">
+                      {arch.layers.map((layer, i) => (
+                        <div key={i} className={`border-l-4 border-pink-500 pl-4 py-3 bg-pink-50 shadow-md ${isDark ? 'bg-gray-700 border-pink-700' : 'hover:bg-pink-100'} transition duration-200`}>
+                          <h4 className={`font-bold text-lg ${themeClasses.textPrimary}`}>Layer {i + 1}: {layer.name}</h4>
+                          <p className={themeClasses.textBody}>{layer.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className={`bg-teal-50 border-2 border-teal-300 rounded-lg p-6 shadow-lg ${isDark ? 'bg-teal-900 border-teal-700' : ''}`}>
+                      <h4 className={`font-bold text-xl mb-4 ${themeClasses.goodText}`}>Key Benefits:</h4>
+                      <ul className="space-y-3">
+                        {arch.benefits.map((benefit, i) => (
+                          <li key={i} className="flex gap-2">
+                            <Check className={`${themeClasses.goodText.replace('text', '')} flex-shrink-0 mt-1`} size={20} />
+                            <span className={themeClasses.textBody}>{benefit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* --- COMBINED AGILE FEATURE ROADMAP TAB --- */}
-        {activeTab === 'agile_feature_roadmap' && renderAgileRoadmap(combinedAgileRoadmap)}
+            {/* --- ROADMAP TABS --- (No changes required here) */}
 
-        {/* --- TECHNICAL ROADMAP TAB --- */}
-        {activeTab === 'technical_roadmap' && renderSingleRoadmap(
-          technicalRoadmap,
-          "Technical Roadmap: Backend & Infrastructure (8 Weeks)",
-          <Server size={30} />,
-          'blue'
-        )}
+            {/* Combined Agile Feature Roadmap Tab */}
+            {activeTab === 'agile_feature_roadmap' && renderAgileRoadmap(combinedAgileRoadmap, themeClasses, isDark)}
 
-        {/* --- UI/UX ROADMAP TAB --- */}
-        {activeTab === 'ui_ux_roadmap' && renderSingleRoadmap(
-          uiUxRoadmap,
-          "UI/UX Roadmap: Design & User Experience (8 Weeks)",
-          <Palette size={30} />,
-          'indigo'
-        )}
+            {/* Technical Roadmap Tab */}
+            {activeTab === 'technical_roadmap' && renderSingleRoadmap(
+              technicalRoadmap,
+              "Technical Roadmap: Backend & Infrastructure (8 Weeks)",
+              <Server size={30} className="text-sky-600" />,
+              'sky',
+              themeClasses,
+              isDark
+            )}
 
-        {/* --- AI/ML ROADMAP TAB --- */}
-        {activeTab === 'ai_ml_roadmap' && renderSingleRoadmap(
-          aiMlRoadmap,
-          "AI/ML Roadmap: Intelligence & Analytics (8 Weeks)",
-          <Brain size={30} />,
-          'purple'
-        )}
+            {/* UI/UX Roadmap Tab */}
+            {activeTab === 'ui_ux_roadmap' && renderSingleRoadmap(
+              uiUxRoadmap,
+              "UI/UX Roadmap: Design & User Experience (8 Weeks)",
+              <Palette size={30} className="text-pink-600" />,
+              'pink',
+              themeClasses,
+              isDark
+            )}
+
+            {/* AI/ML Roadmap Tab */}
+            {activeTab === 'ai_ml_roadmap' && renderSingleRoadmap(
+              aiMlRoadmap,
+              "AI/ML Roadmap: Intelligence & Analytics (8 Weeks)",
+              <Brain size={30} className="text-purple-600" />,
+              'purple',
+              themeClasses,
+              isDark
+            )}
+          </ContentTransitionWrapper>
+        </div>
       </div>
     </div>
   );
